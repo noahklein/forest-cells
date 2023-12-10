@@ -5,6 +5,7 @@ import "core:mem"
 import rl "vendor:raylib"
 
 import "entity"
+import "player"
 import "render"
 
 main :: proc() {
@@ -50,6 +51,8 @@ main :: proc() {
     for !rl.WindowShouldClose() {
         dt := rl.GetFrameTime()
 
+        player_input := player.get_input()
+        player.update(player_input, dt)
         render.draw(camera)
     }
 }
