@@ -19,8 +19,8 @@ Shape :: enum u8 {
 
 Layer :: enum u8 { BG, FG, UI }
 
-init :: proc(size: int) {
-    for layer in Layer do reserve(&graphics_layers[layer], size)
+init :: proc(size_per_layer: int) {
+    for layer in Layer do reserve(&graphics_layers[layer], size_per_layer)
 }
 
 deinit :: proc() {
