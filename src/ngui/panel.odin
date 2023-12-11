@@ -8,7 +8,8 @@ Panel :: struct {
     minimized: bool,
 }
 
-begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
+@(deferred_none=end_panel)
+begin_panel :: proc(title: cstring, rect: rl.Rectangle) -> bool {
     fmt.assertf(state.panel == nil || state.panel == title, "already building panel %q; did you forget an end()?", title)
     if title not_in state.panels {
         state.panels[title] = { rect = rect }
@@ -30,9 +31,14 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
         TITLE_HEIGHT, TITLE_HEIGHT,
     }
     hover_minimize := rl.CheckCollisionPointRec(state.mouse, minimize_button_rect)
-    if !hover_minimize && rl.IsMouseButtonPressed(.LEFT) && rl.CheckCollisionPointRec(state.mouse, title_rect) {
+    hover_title := !hover_minimize && rl.CheckCollisionPointRec(state.mouse, title_rect)
+    if rl.IsMouseButtonPressed(.LEFT) && hover_title {
         state.dragging = title
         state.drag_offset = rl.Vector2{title_rect.x, title_rect.y} - state.mouse
+    }
+    if rl.IsMouseButtonPressed(.RIGHT) && hover_title {
+        fmt.println(int(rect.x), int(rect.y), int(rect.width), int(rect.height), sep = ", ")
+        // fmt.printf("{%f, %f, %f, %f}\n", rect.x, rect.y, rect.width, rect.height)
     }
 
     rl.DrawRectangleRec(title_rect, title_color(state.dragging == title))
@@ -42,7 +48,7 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
     }
 
     if panel.minimized {
-        return
+        return false
     }
 
     // Panel Body. Note: height is resized to fit contents every frame.
@@ -81,6 +87,8 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
 
         rl.DrawTriangle(a, b, c, title_color(hovered))
     }
+
+    return true
 }
 
 end_panel :: proc() {
@@ -94,9 +102,12 @@ end_panel :: proc() {
     state.panel_row = 0
 }
 
-begin_row :: proc(column_widths: []f32) {
+@(deferred_none=end_row)
+flex_row :: proc(column_widths: []f32) -> bool {
     state.column_widths = column_widths
     state.panel_column = 0
+
+    return true
 }
 
 end_row :: proc() {
@@ -106,15 +117,12 @@ end_row :: proc() {
 COMPONENT_HEIGHT  :: TITLE_HEIGHT - 2
 COMPONENT_PADDING :: rl.Vector2{5, 5}
 
-flex_rect :: proc() -> (rect: rl.Rectangle, visible, ok: bool) {
-    p, p_ok := &state.panels[state.panel]
+flex_rect :: proc() -> (rl.Rectangle, bool) {
+    p, p_ok := state.panels[state.panel]
     if !p_ok {
-        return {}, false, false
+        return {}, false
     }
 
-    if p.minimized {
-        return {}, false, true
-    }
     defer state.panel_column += 1
 
     row_rect := rl.Rectangle{
@@ -126,12 +134,12 @@ flex_rect :: proc() -> (rect: rl.Rectangle, visible, ok: bool) {
 
     fmt.assertf(state.panel_column < len(state.column_widths), "Too many components in row. Must be 1:1 with row's column widths: Panel = %s, row = %v", state.panel, state.panel_row)
 
-    rect = row_rect
+    rect := row_rect
     rect.width = row_rect.width * state.column_widths[state.panel_column] - COMPONENT_PADDING.x
     for pct in state.column_widths[:state.panel_column] {
         rect.x += pct * row_rect.width // - COMPONENT_PADDING.x
     }
 
-    return rect, true, true
+    return rect, true
 
 }

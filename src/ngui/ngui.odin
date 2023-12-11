@@ -78,18 +78,12 @@ slider_rect :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32) {
 }
 
 slider :: proc(val: ^f32, $low, $high: f32) {
-    rect, visible := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
-    if !visible {
-        return
-    }
+    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
     slider_rect(rect, val, low, high)
 }
 
 button :: proc(label: cstring) -> bool {
-    rect, visible := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
-    if !visible {
-        return false
-    }
+    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
     return button_rect(rect, label)
 }
 
@@ -106,12 +100,8 @@ button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
 
 
 vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1) {
-    rect, visible := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
     rect.width /= 2
-
-    if !visible {
-        return
-    }
 
     first := rect
     f32_rect(first, &v.x, min, max, step)
@@ -145,10 +135,7 @@ f32_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32
 }
 
 labelf :: proc($format: string, args: ..any, color := TEXT_COLOR, align := TextAlign.Left) {
-    rect, visible := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
-    if !visible {
-        return
-    }
+    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
 
     text := fmt.ctprintf(format, ..args)
     label_rect(rect, text, color)
