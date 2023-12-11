@@ -17,4 +17,9 @@ draw_gui :: proc() {
         ngui.vec2(&tmp_v1)
         ngui.vec2(&tmp_v2, -50, 75, step = 2)
     ngui.end_panel()
+
+
+    ngui.begin_panel("Other Panel", {400, 300, 300, 0})
+        ngui.button("Push me")
+    ngui.end_panel()
 }

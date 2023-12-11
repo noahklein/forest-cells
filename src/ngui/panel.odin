@@ -20,9 +20,11 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
     rect := state.panels[title].rect
 
 
+    // Title bar.
     title_rect := rect
     title_rect.height = TITLE_HEIGHT
 
+    // Minimize button.
     minimize_button_rect := rl.Rectangle{
         title_rect.x + title_rect.width - TITLE_HEIGHT, title_rect.y,
         TITLE_HEIGHT, TITLE_HEIGHT,
@@ -43,10 +45,42 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
         return
     }
 
+    // Panel Body. Note: height is resized to fit contents every frame.
     body_rect := rect
     body_rect.height = rect.height - TITLE_HEIGHT
     body_rect.y = rect.y + TITLE_HEIGHT
     rl.DrawRectangleRec(body_rect, rl.LIGHTGRAY)
+
+    {
+        // Resize window.
+        using body_rect
+        SIZE :: 10
+        // Resize triangle drawn in bottom right corner.
+        a, b, c: rl.Vector2
+        a = {x + width, y + height}
+        b = a - {0, SIZE}
+        c = a - {SIZE, 0}
+
+        // Circle around the bottom-right corner for mouse collision. The actual resize
+        // triangle is way too small to click.
+        hovered := rl.CheckCollisionPointCircle(state.mouse, a, SIZE * 1.5)
+
+        resize_key := fmt.ctprintf("%s#resize", title)
+        if hovered && rl.IsMouseButtonPressed(.LEFT) {
+            state.dragging = resize_key
+            state.drag_offset = a - state.mouse
+        }
+
+        if state.dragging == resize_key {
+            mouse := state.mouse + state.drag_offset
+            panel.rect.width  = mouse.x - panel.rect.x
+            panel.rect.height = mouse.y - panel.rect.y
+            panel.rect.width  = clamp(panel.rect.width,  150, 0.7 * f32(rl.GetScreenWidth()))
+            panel.rect.height = clamp(panel.rect.height, 150, 0.7 * f32(rl.GetScreenHeight()))
+        }
+
+        rl.DrawTriangle(a, b, c, title_color(hovered))
+    }
 }
 
 end_panel :: proc() {
