@@ -7,6 +7,7 @@ import rl "vendor:raylib"
 import "entity"
 import "player"
 import "render"
+import "ngui"
 
 main :: proc() {
      when ODIN_DEBUG {
@@ -36,11 +37,15 @@ main :: proc() {
     rl.InitWindow(1600, 900, "Terminalia")
     defer rl.CloseWindow()
 
+    ngui.init()
+    defer ngui.deinit()
+
     NUM_ENTITIES :: 128 // Just a projection to pre-allocate.
     entity.init(NUM_ENTITIES)
     defer entity.deinit()
     render.init(NUM_ENTITIES)
     defer render.deinit()
+
 
     id := entity.create({ pos = {0, 0}, scale = 50 })
     render.add(.FG, { id, .Circle, rl.RED })
@@ -55,6 +60,7 @@ main :: proc() {
         player.update(player_input, dt)
         render.draw(camera)
 
+        ngui.update()
         render.draw_gui()
     }
 }

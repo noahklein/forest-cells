@@ -1,37 +1,48 @@
 package ngui
 
 import rl "vendor:raylib"
+import "core:fmt"
 
 state : NGui
 
 NGui :: struct {
-    parent: rl.Rectangle,
+    dragging: cstring,
+    drag_offset: rl.Vector2,
+
+    panels: map[cstring]Panel,
+    panel: cstring, // Active panel
+    panel_row: f32,
+}
+
+init :: proc() {
+}
+
+deinit :: proc() {
+    delete(state.panels)
 }
 
 update :: proc() {
-}
+    using state;
+    if dragging != nil && rl.IsMouseButtonUp(.LEFT) {
+        dragging = nil
+    }
 
-end :: proc() {
-    state.parent = {}
-}
-
-panel :: proc(rect: rl.Rectangle, title: cstring) {
-    title_rect := rect
-    title_rect.height = TITLE_HEIGHT
-    rl.DrawRectangleRec(title_rect, TITLE_COLOR)
-    rl.DrawText(title, i32(title_rect.x + 5), i32(title_rect.y + 5), TITLE_FONT, rl.WHITE)
-
-    body_rect := rect
-    body_rect.height = rect.height - TITLE_HEIGHT
-    body_rect.y = rect.y + TITLE_HEIGHT
-    rl.DrawRectangleRec(body_rect, rl.RAYWHITE)
-
-    state.parent = rect
+    if p, ok := &panels[dragging]; ok {
+        pos := rl.GetMousePosition() + drag_offset
+        p.rect.x = pos.x
+        p.rect.y = pos.y
+    }
 }
 
 slider :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32, text: cstring) {
     #assert(low < high)
     pct := val^ / (high - low)
+
+    panel, ok := &state.panels[state.panel]
+    if !ok {
+        panic("Slider must be placed in a panel")
+    }
+    rect := component_rect(panel)
 
     mouse := rl.GetMousePosition()
     clicked := rl.IsMouseButtonPressed(.LEFT)

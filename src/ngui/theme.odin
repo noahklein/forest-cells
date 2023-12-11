@@ -32,3 +32,7 @@ dark_color :: proc(hovered: bool) -> rl.Color {
     }
     return rl.BLACK
 }
+
+title_color :: proc(active: bool) -> rl.Color {
+    return rl.RED if active else rl.MAROON
+}

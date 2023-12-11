@@ -14,7 +14,8 @@ draw_gui :: proc() {
     H :: 12.0
     X :: 5
     Y :: ngui.TITLE_HEIGHT + 1
-    ngui.panel({0, 0, W + PAD, 6 * H}, "Entity")
+    ngui.begin_panel("MyPanel", {0, 0, W + PAD, 6 * H})
         ngui.slider({X, 1 * H + Y, W * 0.8, H }, &tmp, 0, 100, fmt.ctprintf("%v", tmp))
-    ngui.end()
+        ngui.slider({X, 1 * H + Y, W * 0.8, H }, &tmp, 0, 100, fmt.ctprintf("%v", tmp))
+    ngui.end_panel()
 }
