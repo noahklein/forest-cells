@@ -47,7 +47,6 @@ update :: proc() {
         p.rect.x = pos.x
         p.rect.y = pos.y
     }
-
 }
 
 slider_rect :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32) {

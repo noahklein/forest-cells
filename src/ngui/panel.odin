@@ -36,9 +36,10 @@ begin_panel :: proc(title: cstring, rect: rl.Rectangle) -> bool {
         state.dragging = title
         state.drag_offset = rl.Vector2{title_rect.x, title_rect.y} - state.mouse
     }
+
+    // Right click title bar to print panel rectangle to console.
     if rl.IsMouseButtonPressed(.RIGHT) && hover_title {
         fmt.println(int(rect.x), int(rect.y), int(rect.width), int(rect.height), sep = ", ")
-        // fmt.printf("{%f, %f, %f, %f}\n", rect.x, rect.y, rect.width, rect.height)
     }
 
     rl.DrawRectangleRec(title_rect, title_color(state.dragging == title))
