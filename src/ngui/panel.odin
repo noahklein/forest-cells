@@ -75,8 +75,8 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
             mouse := state.mouse + state.drag_offset
             panel.rect.width  = mouse.x - panel.rect.x
             panel.rect.height = mouse.y - panel.rect.y
-            panel.rect.width  = clamp(panel.rect.width,  150, 0.7 * f32(rl.GetScreenWidth()))
-            panel.rect.height = clamp(panel.rect.height, 150, 0.7 * f32(rl.GetScreenHeight()))
+            panel.rect.width  = clamp(panel.rect.width,  150, f32(rl.GetScreenWidth()))
+            panel.rect.height = clamp(panel.rect.height,  50, f32(rl.GetScreenHeight()))
         }
 
         rl.DrawTriangle(a, b, c, title_color(hovered))

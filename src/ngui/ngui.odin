@@ -29,7 +29,8 @@ deinit :: proc() {
 update :: proc() {
     using state;
 
-    mouse = rl.GetMousePosition()
+    screen := rl.Vector2{f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight())}
+    mouse = linalg.clamp(rl.GetMousePosition(), 0, screen)
 
     if dragging != nil && rl.IsMouseButtonUp(.LEFT) {
         dragging = nil
@@ -83,6 +84,8 @@ slider :: proc(val: ^f32, $low, $high: f32) {
     if !visible {
         return
     }
+
+    rect.width *= 0.8
 
     slider_rect(rect, val, low, high)
 }
