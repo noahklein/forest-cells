@@ -84,19 +84,29 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
 }
 
 end_panel :: proc() {
-    body_height := state.panel_row * COMPONENT_HEIGHT
+    body_height := f32(state.panel_row) * COMPONENT_HEIGHT
     p := &state.panels[state.panel] or_else panic("end_panel() called on a missing panel")
     if body_height > p.rect.height - TITLE_HEIGHT {
         p.rect.height = body_height + 2 * TITLE_HEIGHT
     }
 
     state.panel = nil
+    state.panel_row = 0
+}
+
+begin_row :: proc(column_widths: []f32) {
+    state.column_widths = column_widths
+    state.panel_column = 0
+}
+
+end_row :: proc() {
+    state.panel_row += 1
 }
 
 COMPONENT_HEIGHT  :: TITLE_HEIGHT - 2
-COMPONENT_PADDING :: rl.Vector2{20, 5}
+COMPONENT_PADDING :: rl.Vector2{5, 5}
 
-component_rect :: proc() -> (rect: rl.Rectangle, visible, ok: bool) {
+flex_rect :: proc() -> (rect: rl.Rectangle, visible, ok: bool) {
     p, p_ok := &state.panels[state.panel]
     if !p_ok {
         return {}, false, false
@@ -105,12 +115,23 @@ component_rect :: proc() -> (rect: rl.Rectangle, visible, ok: bool) {
     if p.minimized {
         return {}, false, true
     }
-    defer state.panel_row += 1
+    defer state.panel_column += 1
 
-    return {
+    row_rect := rl.Rectangle{
         p.rect.x + COMPONENT_PADDING.x,
-        p.rect.y + TITLE_HEIGHT + state.panel_row * COMPONENT_HEIGHT + COMPONENT_PADDING.y,
-        p.rect.width - 2 * COMPONENT_PADDING.x,
+        p.rect.y + TITLE_HEIGHT + f32(state.panel_row) * COMPONENT_HEIGHT + COMPONENT_PADDING.y,
+        p.rect.width - COMPONENT_PADDING.x,
         COMPONENT_HEIGHT - COMPONENT_PADDING.y,
-    }, true, true
+    }
+
+    fmt.assertf(state.panel_column < len(state.column_widths), "Too many components in row. Must be 1:1 with row's column widths: Panel = %s, row = %v", state.panel, state.panel_row)
+
+    rect = row_rect
+    rect.width = row_rect.width * state.column_widths[state.panel_column] - COMPONENT_PADDING.x
+    for pct in state.column_widths[:state.panel_column] {
+        rect.x += pct * row_rect.width // - COMPONENT_PADDING.x
+    }
+
+    return rect, true, true
+
 }
