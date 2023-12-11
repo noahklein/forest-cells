@@ -15,6 +15,6 @@ draw_gui :: proc() {
         ngui.slider(&tmp_b, 11, 35)
         ngui.button("Push me")
         ngui.vec2(&tmp_v1)
-        ngui.vec2(&tmp_v2, -50, 75, 2)
+        ngui.vec2(&tmp_v2, -50, 75, step = 2)
     ngui.end_panel()
 }

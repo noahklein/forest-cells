@@ -5,6 +5,7 @@ import rl "vendor:raylib"
 
 Panel :: struct {
     rect: rl.Rectangle,
+    minimized: bool,
 }
 
 begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
@@ -14,20 +15,33 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
     }
     state.panel = title
     state.panel_row = 0
+
+    panel := &state.panels[title]
     rect := state.panels[title].rect
 
-    mouse := rl.GetMousePosition()
 
     title_rect := rect
     title_rect.height = TITLE_HEIGHT
 
-    if rl.IsMouseButtonPressed(.LEFT) && rl.CheckCollisionPointRec(mouse, title_rect) {
+    minimize_button_rect := rl.Rectangle{
+        title_rect.x + title_rect.width - TITLE_HEIGHT, title_rect.y,
+        TITLE_HEIGHT, TITLE_HEIGHT,
+    }
+    hover_minimize := rl.CheckCollisionPointRec(state.mouse, minimize_button_rect)
+    if !hover_minimize && rl.IsMouseButtonPressed(.LEFT) && rl.CheckCollisionPointRec(state.mouse, title_rect) {
         state.dragging = title
-        state.drag_offset = rl.Vector2{title_rect.x, title_rect.y} - mouse
+        state.drag_offset = rl.Vector2{title_rect.x, title_rect.y} - state.mouse
     }
 
     rl.DrawRectangleRec(title_rect, title_color(state.dragging == title))
     rl.DrawText(title, i32(title_rect.x + 5), i32(title_rect.y + 5), TITLE_FONT, rl.WHITE)
+    if button_rect(minimize_button_rect, "+" if panel.minimized else "-") {
+        panel.minimized = !panel.minimized
+    }
+
+    if panel.minimized {
+        return
+    }
 
     body_rect := rect
     body_rect.height = rect.height - TITLE_HEIGHT
@@ -48,10 +62,14 @@ end_panel :: proc() {
 COMPONENT_HEIGHT  :: TITLE_HEIGHT - 2
 COMPONENT_PADDING :: rl.Vector2{20, 5}
 
-component_rect :: proc() -> (rl.Rectangle, bool) {
-    p, ok := &state.panels[state.panel]
-    if !ok {
-        return {}, false
+component_rect :: proc() -> (rect: rl.Rectangle, visible, ok: bool) {
+    p, p_ok := &state.panels[state.panel]
+    if !p_ok {
+        return {}, false, false
+    }
+
+    if p.minimized {
+        return {}, false, true
     }
     defer state.panel_row += 1
 
@@ -60,5 +78,5 @@ component_rect :: proc() -> (rl.Rectangle, bool) {
         p.rect.y + TITLE_HEIGHT + state.panel_row * COMPONENT_HEIGHT + COMPONENT_PADDING.y,
         p.rect.width - 2 * COMPONENT_PADDING.x,
         COMPONENT_HEIGHT - COMPONENT_PADDING.y,
-    }, true
+    }, true, true
 }

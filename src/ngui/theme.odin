@@ -15,8 +15,8 @@ ACTIVE_BUTTON_COLOR  :: rl.SKYBLUE
 
 SLIDER_WIDTH :: 16
 
-button_color :: proc(hovered: bool) -> rl.Color {
-    if hovered && rl.IsMouseButtonDown(.LEFT) {
+button_color :: proc(hovered, active: bool) -> rl.Color {
+    if active {
         return ACTIVE_BUTTON_COLOR
     } else if hovered {
         return HOVER_BUTTON_COLOR
@@ -24,8 +24,8 @@ button_color :: proc(hovered: bool) -> rl.Color {
     return DEFAULT_BUTTON_COLOR
 }
 
-dark_color :: proc(hovered: bool) -> rl.Color {
-    if hovered && rl.IsMouseButtonDown(.LEFT) {
+dark_color :: proc(hovered, active: bool) -> rl.Color {
+    if active {
         return {80, 80, 80, 255}
     } else if hovered {
         return {40, 40, 40, 255}

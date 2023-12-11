@@ -64,8 +64,10 @@ slider_rect :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32) {
         val^ = clamp(v, low, high)
     }
 
-    rl.DrawRectangleRec({rect.x, rect.y, rect.width, rect.height}, dark_color(is_active))
-    rl.DrawRectangleRec(slider_rect, button_color(is_active))
+    is_hover := hovered(rect)
+
+    rl.DrawRectangleRec({rect.x, rect.y, rect.width, rect.height}, dark_color(is_hover, is_active))
+    rl.DrawRectangleRec(slider_rect, button_color(is_hover, is_active))
 
     x := rect.x + rect.width + SLIDER_WIDTH / 2
     y := rect.y + rect.height / 2 - f32(FONT) / 2
@@ -77,20 +79,26 @@ slider :: proc(val: ^f32, $low, $high: f32) {
     if !ok {
         panic("Slider must be placed in a panel")
     }
-    rect := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect, visible := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    if !visible {
+        return
+    }
 
     slider_rect(rect, val, low, high)
 }
 
 button :: proc(label: cstring) -> bool {
-    rect := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect, visible := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    if !visible {
+        return false
+    }
     return button_rect(rect, label)
 }
 
 button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
     hovered := rl.CheckCollisionPointRec(rl.GetMousePosition(), rect)
 
-    rl.DrawRectangleRec(rect, button_color(hovered))
+    rl.DrawRectangleRec(rect, button_color(hovered, hovered && rl.IsMouseButtonDown(.LEFT)))
     if label != nil {
         center_text(rect, label, rl.WHITE)
     }
@@ -100,8 +108,12 @@ button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
 
 
 vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1) {
-    rect := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect, visible := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
     rect.width /= 2
+
+    if !visible {
+        return
+    }
 
     first := rect
     f32_rect(first, &v.x, min, max, step)
@@ -122,11 +134,11 @@ f32_rect :: proc(rect: rl.Rectangle, f: ^f32, min: f32 = -INF, max: f32 = INF, s
     if dragging {
         slow_down: f32 = 0.1 if rl.IsKeyDown(.LEFT_ALT)   else 1.0
         speed_up : f32 = 10  if rl.IsKeyDown(.LEFT_SHIFT) else 1.0
-        f^ += rl.GetMouseDelta().x * step * slow_down
+        f^ += rl.GetMouseDelta().x * step * slow_down * speed_up
         f^ = clamp(f^, min, max)
     }
 
-    rl.DrawRectangleRec(rect, button_color(dragging))
+    rl.DrawRectangleRec(rect, button_color(hovered(rect), dragging))
     center_text(rect, fmt.ctprintf("%.2f", f^), rl.WHITE)
 }
 
@@ -137,5 +149,9 @@ center_text :: proc(rect: rl.Rectangle, text: cstring, color: rl.Color = TEXT_CO
 }
 
 pressed :: #force_inline proc(rect: rl.Rectangle) -> bool {
-    return rl.IsMouseButtonPressed(.LEFT) && rl.CheckCollisionPointRec(rl.GetMousePosition(), rect)
+    return rl.IsMouseButtonPressed(.LEFT) && hovered(rect)
+}
+
+hovered :: #force_inline proc(rect: rl.Rectangle) -> bool {
+    return rl.CheckCollisionPointRec(state.mouse, rect)
 }
