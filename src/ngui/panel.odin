@@ -36,17 +36,29 @@ begin_panel :: proc($title: cstring, rect: rl.Rectangle) {
 }
 
 end_panel :: proc() {
+    body_height := state.panel_row * COMPONENT_HEIGHT
+    p := &state.panels[state.panel] or_else panic("end_panel() called on a missing panel")
+    if body_height > p.rect.height - TITLE_HEIGHT {
+        p.rect.height = body_height + 2 * TITLE_HEIGHT
+    }
+
     state.panel = nil
 }
 
-COMPONENT_HEIGHT :: TITLE_HEIGHT - 2
-COMPONENT_PADDING :: rl.Vector2{10, 5}
-component_rect :: proc(p: ^Panel) -> rl.Rectangle {
+COMPONENT_HEIGHT  :: TITLE_HEIGHT - 2
+COMPONENT_PADDING :: rl.Vector2{20, 5}
+
+component_rect :: proc() -> (rl.Rectangle, bool) {
+    p, ok := &state.panels[state.panel]
+    if !ok {
+        return {}, false
+    }
     defer state.panel_row += 1
+
     return {
         p.rect.x + COMPONENT_PADDING.x,
         p.rect.y + TITLE_HEIGHT + state.panel_row * COMPONENT_HEIGHT + COMPONENT_PADDING.y,
-        p.rect.width - COMPONENT_PADDING.x,
+        p.rect.width - 2 * COMPONENT_PADDING.x,
         COMPONENT_HEIGHT - COMPONENT_PADDING.y,
-    }
+    }, true
 }

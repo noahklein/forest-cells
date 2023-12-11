@@ -23,6 +23,7 @@ deinit :: proc() {
 
 update :: proc() {
     using state;
+
     if dragging != nil && rl.IsMouseButtonUp(.LEFT) {
         dragging = nil
     }
@@ -34,7 +35,7 @@ update :: proc() {
     }
 }
 
-slider :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32, text: cstring) {
+slider :: proc(val: ^f32, $low, $high: f32) {
     #assert(low < high)
     pct := val^ / (high - low)
 
@@ -42,30 +43,37 @@ slider :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32, text: cstring) {
     if !ok {
         panic("Slider must be placed in a panel")
     }
-    rect := component_rect(panel)
-
-    mouse := rl.GetMousePosition()
-    clicked := rl.IsMouseButtonPressed(.LEFT)
+    rect := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
 
     slider_x := rect.x + pct * rect.width - SLIDER_WIDTH / 2 // Cursor should be in center of slider control
     slider_x  = clamp(slider_x, rect.x, rect.x + rect.width - SLIDER_WIDTH)
     slider_rect := rl.Rectangle{slider_x, rect.y, SLIDER_WIDTH, rect.height}
 
-
-    hovered := rl.CheckCollisionPointRec(mouse, rect)
-    if hovered && rl.IsMouseButtonDown(.LEFT) {
-        mouse_pct := (mouse.x - rect.x) / rect.width
-        val^ = mouse_pct * (high - low)
+    key := fmt.ctprintf("%s#%.0fslider", state.panel, state.panel_row)
+    mouse := rl.GetMousePosition()
+    if rl.CheckCollisionPointRec(mouse, rect) && rl.IsMouseButtonPressed(.LEFT) {
+        state.dragging = key
+        state.drag_offset = {0, 0}
     }
 
-    rl.DrawRectangleRec({rect.x, rect.y, rect.width, rect.height}, dark_color(hovered))
-    rl.DrawRectangleRec(slider_rect, button_color(hovered))
+    is_active := state.dragging == key
+    if is_active {
+        mouse_pct := (mouse.x - rect.x) / rect.width
+        v := mouse_pct * (high - low)
+        val^ = clamp(v, low, high)
+    }
+
+    rl.DrawRectangleRec({rect.x, rect.y, rect.width, rect.height}, dark_color(is_active))
+    rl.DrawRectangleRec(slider_rect, button_color(is_active))
+
     x := rect.x + rect.width + SLIDER_WIDTH / 2
     y := rect.y + rect.height / 2 - f32(FONT) / 2
-    rl.DrawText(text, i32(x), i32(y), FONT, TEXT_COLOR)
+    rl.DrawText(fmt.ctprintf("%v", val^), i32(x), i32(y), FONT, TEXT_COLOR)
 }
 
-button :: proc(rect: rl.Rectangle, label: cstring) -> bool {
+button :: proc(label: cstring) -> bool {
+    rect := component_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+
     hovered := rl.CheckCollisionPointRec(rl.GetMousePosition(), rect)
 
     rl.DrawRectangleRec(rect, button_color(hovered))
