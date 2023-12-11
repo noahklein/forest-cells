@@ -27,24 +27,27 @@ get_input :: proc() -> (input: bit_set[PlayerInput]) {
 }
 
 SPEED :: 100
-FRICTION :: 0.1
+FRICTION :: 0.95
 
 update :: proc(input: bit_set[PlayerInput], dt: f32) {
     ent := entity.get(player.ent_id) or_else
         panic("player.update() called but player entity id is invalid")
 
-         if .Left  in input do player.vel.x -= SPEED * dt
-    else if .Right in input do player.vel.x += SPEED * dt
+    acc : rl.Vector2
+
+         if .Left  in input do acc.x = -SPEED
+    else if .Right in input do acc.x =  SPEED
 
     if .Jump in input && player.grounded {
         player.grounded = false
-        player.vel.y = SPEED
+        acc.y = SPEED
     }
 
     // Friction
-    if .Left in input || .Right in input {
-        player.vel -= player.vel * FRICTION * dt
+    if .Left not_in input && .Right not_in input {
+        acc -= player.vel * FRICTION
     }
 
+    player.vel += acc * dt
     ent.pos += player.vel * dt
 }

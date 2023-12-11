@@ -54,6 +54,8 @@ main :: proc() {
         player_input := player.get_input()
         player.update(player_input, dt)
         render.draw(camera)
+
+        render.draw_gui()
     }
 }
 
