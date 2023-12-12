@@ -3,6 +3,7 @@ package player
 import "core:math/linalg"
 import rl "vendor:raylib"
 import "../entity"
+import "../ngui"
 
 player: Player
 
@@ -18,6 +19,10 @@ PlayerInput :: enum {
 }
 
 get_input :: proc() -> (input: bit_set[PlayerInput]) {
+    if ngui.want_keyboard() {
+        return
+    }
+
          if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT)  do input += {.Left}
     else if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) do input += {.Right}
 

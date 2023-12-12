@@ -186,9 +186,27 @@ input_rect :: proc(rect: rl.Rectangle, text: ^string) {
             append(&state.input_buf, char)
         }
 
+        // Backspace to delete.
         if len(state.input_buf) > 0 && rl.IsKeyPressed(.BACKSPACE) {
-            pop(&state.input_buf)
+            pop(&state.input_buf) // Always delete one character.
+
+            // Ctrl+Backspace deletes entire words.
+            if rl.IsKeyDown(.LEFT_CONTROL) {
+                for len(state.input_buf) > 0 {
+                    c, ok := pop_safe(&state.input_buf)
+                    if !ok {
+                        fmt.eprintln("error")
+                        return
+                    }
+                    switch c {
+                    // Stop characters divide words.
+                    case ' ', '-' ,'_': return
+                    case:
+                    }
+                }
+            }
         }
+        // Ctrl+U clears whole buffer like UNIX terminals.
         if rl.IsKeyDown(.LEFT_CONTROL) && rl.IsKeyPressed(.U) {
             clear(&state.input_buf)
         }
@@ -229,4 +247,9 @@ padding :: #force_inline proc(rect: rl.Rectangle, pad: rl.Vector2) -> rl.Rectang
         rect.width  - 2 * pad.x,
         rect.height - 2 * pad.y,
     }
+}
+
+@(require_results)
+want_keyboard :: #force_inline proc() -> bool {
+    return state.active_input != nil
 }
