@@ -35,19 +35,19 @@ draw_gui :: proc() {
         }
 
         if ngui.flex_row({.2, .8}) {
-            ngui.labelf("Name:")
+            ngui.labelf("Name:", align = .Right)
             ngui.input(&my_str, "Name: ")
         }
         if ngui.flex_row({.6, .4,}) {
             ngui.input(&my_other_str, "Maiden Name:")
-            ngui.labelf("%v", my_other_str)
+            ngui.labelf("%v", my_other_str, color = rl.DARKBLUE, align = .Left)
         }
     }
 
     if ngui.begin_panel("Game", {1290, 20, 300, 0}) {
         if ngui.flex_row({0.7, 0.2}) {
             ngui.slider(&tmp_a, 0, 100)
-            ngui.labelf("%.1fx Speed", tmp_a)
+            ngui.labelf("%.1fx Speed", tmp_a, align = .Center)
         }
 
         MAX_SPEED :: 20
@@ -59,7 +59,6 @@ draw_gui :: proc() {
             ngui.vec2(&player.player.vel, min = -MAX_SPEED, max = MAX_SPEED, step = 0.1)
             ngui.labelf("Vel")
         }
-
     }
 
 

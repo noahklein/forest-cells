@@ -11,21 +11,24 @@ TextInput :: struct {
 TextAlign :: enum {
     Left,
     Center,
+    Right,
 }
 
 labelf :: proc($format: string, args: ..any, color := TEXT_COLOR, align := TextAlign.Left) {
     rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
 
     text := fmt.ctprintf(format, ..args)
-    label_rect(rect, text, color)
+    label_rect(rect, text, color, align)
 }
 
 label_rect :: proc(rect: rl.Rectangle, text: cstring, color := TEXT_COLOR, align := TextAlign.Left) {
     y := rect.y + (rect.height / 2) - (f32(FONT) / 2)
 
-    x := rect.x
-    if align == .Center {
-        x = rect.x + (rect.width / 2) - f32(len(text)) * 2
+    x : f32
+    switch align {
+    case .Left:   x = rect.x
+    case .Center: x = rect.x + (rect.width / 2) - f32(rl.MeasureText(text, FONT)) / 2
+    case .Right:  x = (rect.x + rect.width) - f32(rl.MeasureText(text, FONT))
     }
 
     rl.DrawText(text, i32(x), i32(y), FONT, color)
@@ -33,11 +36,11 @@ label_rect :: proc(rect: rl.Rectangle, text: cstring, color := TEXT_COLOR, align
 
 input :: proc(text: ^string, $label: cstring) {
     rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
-    input_rect(rect, text, key = label)
+    input_rect(rect, text, label)
 }
 
-input_rect :: proc(rect: rl.Rectangle, text: ^string, key: cstring = state.panel) {
-    key := fmt.ctprintf("%s#input", key)
+input_rect :: proc(rect: rl.Rectangle, text: ^string, label: cstring) {
+    key := fmt.ctprintf("%s#input", label)
     active := state.active_input == key
 
     // Initialize text input.
@@ -70,7 +73,6 @@ input_rect :: proc(rect: rl.Rectangle, text: ^string, key: cstring = state.panel
         for char := rl.GetCharPressed(); char != 0; char = rl.GetCharPressed() {
             state.last_keypress_time = rl.GetTime()
             strings.write_rune(&input.buf, char)
-            // fmt.sbprint(&input.buf, char)
         }
 
         // Backspace to delete.
@@ -108,6 +110,6 @@ input_rect :: proc(rect: rl.Rectangle, text: ^string, key: cstring = state.panel
         cursor_rect := text_rect
         cursor_rect.x += f32(rl.MeasureText(cstr, FONT))
         cursor_rect.width = INPUT_CURSOR_WIDTH
-        rl.DrawRectangleRec(cursor_rect, cursor_color(rl.SKYBLUE))
+        rl.DrawRectangleRec(cursor_rect, cursor_color())
     }
 }

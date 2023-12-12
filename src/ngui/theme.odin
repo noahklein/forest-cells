@@ -45,26 +45,29 @@ title_color :: proc(active: bool) -> rl.Color {
 }
 
 input_color :: proc(hover, active: bool) -> rl.Color {
-    if active {
-        return rl.BLACK
-    } else if hover {
-        return rl.BLACK + {15, 15, 15, 0}
-    } else {
-        return rl.BLACK + {45, 45, 45, 0}
+    color := dark_color(hover, active)
+    if hover && rl.IsMouseButtonDown(.LEFT) {
+        color += {20, 20, 20, 0}
     }
+    return color
 }
 
 // Blinks between white and non_white.
-cursor_color :: proc(non_white := TEXT_COLOR) -> rl.Color {
+cursor_color :: proc(non_white := rl.BLUE) -> rl.Color {
     now := rl.GetTime()
-    t := math.cos(2 * now - state.last_keypress_time)
+    t := math.cos(2 * (now - state.last_keypress_time))
     t *= t
 
-    white := [4]f32{1, 1, 1, 1}
-    non_white_vec := color_to_vec(non_white)
-    color := linalg.lerp(white, non_white_vec, f32(t))
-    color *= 255
-    return {u8(color.r), u8(color.g), u8(color.b), u8(color.a)}
+    return lerp_color(rl.WHITE, non_white, f32(t))
+}
+
+lerp_color :: proc(ac, bc: rl.Color, t: f32) -> rl.Color {
+    a := linalg.array_cast(ac, f32)
+    b := linalg.array_cast(bc, f32)
+
+    v := linalg.lerp(a, b, t)
+
+    return rl.Color(linalg.array_cast(v, u8))
 }
 
 color_to_vec :: proc(c: rl.Color) -> [4]f32 {
