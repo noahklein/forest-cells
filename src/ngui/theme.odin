@@ -54,15 +54,15 @@ input_color :: proc(hover, active: bool) -> rl.Color {
     }
 }
 
+// Blinks between white and non_white.
 cursor_color :: proc(non_white := TEXT_COLOR) -> rl.Color {
     now := rl.GetTime()
-    last_keypress_time :: 0 // @Incomplete
-    t := math.cos(2 * f32(now - last_keypress_time))
+    t := math.cos(2 * now - state.last_keypress_time)
     t *= t
 
     white := [4]f32{1, 1, 1, 1}
     non_white_vec := color_to_vec(non_white)
-    color := linalg.lerp(white, non_white_vec, t)
+    color := linalg.lerp(white, non_white_vec, f32(t))
     color *= 255
     return {u8(color.r), u8(color.g), u8(color.b), u8(color.a)}
 }

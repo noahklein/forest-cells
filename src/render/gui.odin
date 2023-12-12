@@ -36,11 +36,11 @@ draw_gui :: proc() {
 
         if ngui.flex_row({.2, .8}) {
             ngui.labelf("Name:")
-            ngui.input(&my_str)
+            ngui.input(&my_str, "Name: ")
         }
-        if ngui.flex_row({.2, .8}) {
-            ngui.labelf("Maiden Name:")
-            ngui.input(&my_other_str)
+        if ngui.flex_row({.6, .4,}) {
+            ngui.input(&my_other_str, "Maiden Name:")
+            ngui.labelf("%v", my_other_str)
         }
     }
 

@@ -16,9 +16,9 @@ NGui :: struct {
     dragging: cstring,
     drag_offset: rl.Vector2,
 
+    text_inputs: map[cstring]TextInput,
     active_input: cstring,
-    input_buf: [dynamic]rune,
-    input_cursor_blink: f32,
+    last_keypress_time: f64,
 
     panels: map[cstring]Panel,
     panel: cstring, // Active panel
@@ -26,19 +26,17 @@ NGui :: struct {
     column_widths: []f32,
 }
 
-TextAlign :: enum {
-    Left,
-    Center,
-}
-
 init :: proc() {
     reserve(&state.panels, 16)
-    reserve(&state.input_buf, 256)
+    reserve(&state.text_inputs, 16)
 }
 
 deinit :: proc() {
     delete(state.panels)
-    delete(state.input_buf)
+    for key, &ti in state.text_inputs {
+        strings.builder_destroy(&ti.buf)
+    }
+    delete(state.text_inputs)
 }
 
 update :: proc() {
@@ -142,96 +140,6 @@ f32_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32
 
     rl.DrawRectangleRec(rect, button_color(hovered(rect), dragging))
     label_rect(rect, fmt.ctprintf("%.2f", f^), color = rl.WHITE, align = .Center)
-}
-
-labelf :: proc($format: string, args: ..any, color := TEXT_COLOR, align := TextAlign.Left) {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
-
-    text := fmt.ctprintf(format, ..args)
-    label_rect(rect, text, color)
-}
-
-label_rect :: proc(rect: rl.Rectangle, text: cstring, color := TEXT_COLOR, align := TextAlign.Left) {
-    y := rect.y + (rect.height / 2) - (f32(FONT) / 2)
-
-    x := rect.x
-    if align == .Center {
-        x = rect.x + (rect.width / 2) - f32(len(text)) * 2
-    }
-
-    rl.DrawText(text, i32(x), i32(y), FONT, color)
-}
-
-input :: proc(text: ^string) {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
-    input_rect(rect, text)
-}
-
-input_rect :: proc(rect: rl.Rectangle, text: ^string) {
-    key := fmt.ctprintf("input#%v", rect)
-
-    hover := hovered(rect)
-    if hover && rl.IsMouseButtonPressed(.LEFT) {
-        state.active_input = key
-
-        clear(&state.input_buf)
-        for char in text {
-            append(&state.input_buf, char)
-        }
-    }
-
-    active := state.active_input == key
-    active_label: if active {
-        if !hover && rl.IsMouseButtonPressed(.LEFT) {
-            state.active_input = nil
-            break active_label
-        }
-
-        for char := rl.GetCharPressed(); char != 0; char = rl.GetCharPressed() {
-            append(&state.input_buf, char)
-        }
-
-        // Backspace to delete.
-        if len(state.input_buf) > 0 && rl.IsKeyPressed(.BACKSPACE) {
-            pop(&state.input_buf) // Always delete one character.
-
-            // Ctrl+Backspace deletes entire words.
-            if rl.IsKeyDown(.LEFT_CONTROL) {
-                for len(state.input_buf) > 0 {
-                    c, ok := pop_safe(&state.input_buf)
-                    if !ok {
-                        fmt.eprintln("error")
-                        return
-                    }
-                    switch c {
-                    // Stop characters divide words.
-                    case ' ', '-' ,'_': return
-                    case:
-                    }
-                }
-            }
-        }
-        // Ctrl+U clears whole buffer like UNIX terminals.
-        if rl.IsKeyDown(.LEFT_CONTROL) && rl.IsKeyPressed(.U) {
-            clear(&state.input_buf)
-        }
-    }
-
-    rl.DrawRectangleRec(rect, input_color(hover, active))
-
-    str  := utf8.runes_to_string(state.input_buf[:], context.temp_allocator)
-    cstr := strings.clone_to_cstring(str, context.temp_allocator)
-
-    text_rect := padding(rect, {INPUT_PAD, INPUT_PAD})
-    label_rect(text_rect, cstr)
-
-    // Cursor
-    if active {
-        cursor_rect := text_rect
-        cursor_rect.x += f32(rl.MeasureText(cstr, FONT))
-        cursor_rect.width = INPUT_CURSOR_WIDTH
-        rl.DrawRectangleRec(cursor_rect, cursor_color(rl.SKYBLUE))
-    }
 }
 
 @(require_results)
