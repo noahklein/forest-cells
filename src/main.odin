@@ -46,8 +46,9 @@ main :: proc() {
     render.init(NUM_ENTITIES)
     defer render.deinit()
 
-
+    // Player entity
     id := entity.create({ pos = {0, 0}, scale = 50 })
+    player.player.ent_id = id
     render.add(.FG, { id, .Circle, rl.RED })
 
     camera := rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
@@ -60,7 +61,6 @@ main :: proc() {
         player.update(player_input, dt)
         render.draw(camera)
 
-        ngui.update()
         render.draw_gui()
     }
 }

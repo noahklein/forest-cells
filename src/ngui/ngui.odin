@@ -2,6 +2,8 @@ package ngui
 
 import "core:math/linalg"
 import "core:fmt"
+import "core:strings"
+import "core:unicode/utf8"
 import rl "vendor:raylib"
 
 INF :: f32(1e7)
@@ -13,6 +15,10 @@ NGui :: struct {
 
     dragging: cstring,
     drag_offset: rl.Vector2,
+
+    active_input: cstring,
+    input_buf: [dynamic]rune,
+    input_cursor_blink: f32,
 
     panels: map[cstring]Panel,
     panel: cstring, // Active panel
@@ -26,10 +32,13 @@ TextAlign :: enum {
 }
 
 init :: proc() {
+    reserve(&state.panels, 16)
+    reserve(&state.input_buf, 256)
 }
 
 deinit :: proc() {
     delete(state.panels)
+    delete(state.input_buf)
 }
 
 update :: proc() {
@@ -47,6 +56,8 @@ update :: proc() {
         p.rect.x = pos.x
         p.rect.y = pos.y
     }
+
+    assert(len(state.panels) <= 32, "Using more than 32 panels, is this intentional?")
 }
 
 slider_rect :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32) {
@@ -151,6 +162,55 @@ label_rect :: proc(rect: rl.Rectangle, text: cstring, color := TEXT_COLOR, align
     rl.DrawText(text, i32(x), i32(y), FONT, color)
 }
 
+input :: proc(text: ^string) {
+    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    input_rect(rect, text)
+}
+
+input_rect :: proc(rect: rl.Rectangle, text: ^string) {
+    key := fmt.ctprintf("input#%v", rect)
+
+    hover := hovered(rect)
+    if hover && rl.IsMouseButtonPressed(.LEFT) {
+        state.active_input = key
+
+        clear(&state.input_buf)
+        for char in text {
+            append(&state.input_buf, char)
+        }
+    }
+
+    active := state.active_input == key
+    if active {
+        for char := rl.GetCharPressed(); char != 0; char = rl.GetCharPressed() {
+            append(&state.input_buf, char)
+        }
+
+        if len(state.input_buf) > 0 && rl.IsKeyPressed(.BACKSPACE) {
+            pop(&state.input_buf)
+        }
+        if rl.IsKeyDown(.LEFT_CONTROL) && rl.IsKeyPressed(.U) {
+            clear(&state.input_buf)
+        }
+    }
+
+    rl.DrawRectangleRec(rect, input_color(hover, active))
+
+    str  := utf8.runes_to_string(state.input_buf[:], context.temp_allocator)
+    cstr := strings.clone_to_cstring(str, context.temp_allocator)
+
+    text_rect := padding(rect, {INPUT_PAD, INPUT_PAD})
+    label_rect(text_rect, cstr)
+
+    // Cursor
+    if active {
+        cursor_rect := text_rect
+        cursor_rect.x += f32(rl.MeasureText(cstr, FONT))
+        cursor_rect.width = INPUT_CURSOR_WIDTH
+        rl.DrawRectangleRec(cursor_rect, cursor_color(rl.SKYBLUE))
+    }
+}
+
 @(require_results)
 pressed :: #force_inline proc(rect: rl.Rectangle) -> bool {
     return rl.IsMouseButtonPressed(.LEFT) && hovered(rect)
@@ -159,4 +219,14 @@ pressed :: #force_inline proc(rect: rl.Rectangle) -> bool {
 @(require_results)
 hovered :: #force_inline proc(rect: rl.Rectangle) -> bool {
     return rl.CheckCollisionPointRec(state.mouse, rect)
+}
+
+@(require_results)
+padding :: #force_inline proc(rect: rl.Rectangle, pad: rl.Vector2) -> rl.Rectangle {
+    return {
+        rect.x + pad.x,
+        rect.y + pad.y,
+        rect.width  - 2 * pad.x,
+        rect.height - 2 * pad.y,
+    }
 }

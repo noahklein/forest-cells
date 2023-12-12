@@ -8,8 +8,11 @@ import "../entity"
 
 tmp_a, tmp_b : f32
 tmp_v1, tmp_v2 : rl.Vector2
+my_str, my_other_str: string
 
 draw_gui :: proc() {
+    ngui.update()
+
     if ngui.begin_panel("MyPanel", {0, 0, 320, 0}) {
         if ngui.flex_row({1}) {
             ngui.button("hello")
@@ -29,6 +32,15 @@ draw_gui :: proc() {
 
             ngui.vec2(&tmp_v1)
             ngui.vec2(&tmp_v2, min = -50, max = 75, step = 1)
+        }
+
+        if ngui.flex_row({.2, .8}) {
+            ngui.labelf("Name:")
+            ngui.input(&my_str)
+        }
+        if ngui.flex_row({.2, .8}) {
+            ngui.labelf("Maiden Name:")
+            ngui.input(&my_other_str)
         }
     }
 
