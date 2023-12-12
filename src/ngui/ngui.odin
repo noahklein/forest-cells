@@ -181,7 +181,12 @@ input_rect :: proc(rect: rl.Rectangle, text: ^string) {
     }
 
     active := state.active_input == key
-    if active {
+    active_label: if active {
+        if !hover && rl.IsMouseButtonPressed(.LEFT) {
+            state.active_input = nil
+            break active_label
+        }
+
         for char := rl.GetCharPressed(); char != 0; char = rl.GetCharPressed() {
             append(&state.input_buf, char)
         }
