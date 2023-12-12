@@ -9,6 +9,8 @@ import "player"
 import "render"
 import "ngui"
 
+timescale: f32
+
 main :: proc() {
      when ODIN_DEBUG {
         track: mem.Tracking_Allocator
@@ -55,13 +57,15 @@ main :: proc() {
 
     rl.SetTargetFPS(120)
     for !rl.WindowShouldClose() {
-        dt := rl.GetFrameTime()
+        dt := rl.GetFrameTime() * timescale
 
         player_input := player.get_input()
         player.update(player_input, dt)
         render.draw(camera)
 
-        render.draw_gui()
+        when ODIN_DEBUG {
+            draw_gui()
+        }
     }
 }
 

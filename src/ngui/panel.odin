@@ -115,7 +115,7 @@ end_row :: proc() {
     state.panel_row += 1
 }
 
-COMPONENT_HEIGHT  :: TITLE_HEIGHT - 2
+COMPONENT_HEIGHT  :: TITLE_HEIGHT
 COMPONENT_PADDING :: rl.Vector2{5, 2}
 
 flex_rect :: proc() -> (rl.Rectangle, bool) {
@@ -143,5 +143,4 @@ flex_rect :: proc() -> (rl.Rectangle, bool) {
     }
 
     return rect, true
-
 }
