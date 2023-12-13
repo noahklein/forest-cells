@@ -51,7 +51,7 @@ create :: proc(e: Entity) -> Id {
 }
 
 destroy :: proc(id: Id) {
-    if id.age == data.ages[id.age] {
+    if id.age == data.ages[id.index] {
         data.ages[id.index] += 1
     }
 }
@@ -66,8 +66,7 @@ get :: #force_inline proc(id: Id) -> (^Entity, bool) {
 
 @(test)
 test_storage :: proc(t: ^testing.T) {
-    init(4)
-    defer deinit()
+    init(2)
 
     want_pos := rl.Vector2{10, 13}
     id := create({pos = want_pos})
