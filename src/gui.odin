@@ -20,36 +20,16 @@ o : O
 draw_gui :: proc() {
     ngui.update()
 
-    if ngui.begin_panel("MyPanel", {0, 0, 320, 0}) {
-        if ngui.flex_row({1}) {
-            if ngui.button("hello") {
+    if ngui.begin_panel("Grid", {0, 0, 320, 0}) {
+        if ngui.flex_row({0.25, 0.25, 0.5}) {
+            if ngui.button("Less") {
+                level_grid.size -= 1
+            }
+            if ngui.button("More") {
+                level_grid.size += 1
 
             }
-        }
-        if ngui.flex_row({0.5, 0.5}) {
-            ngui.slider(&tmp_a, 0, 100)
-            ngui.slider(&tmp_b, 0, 100)
-        }
-
-        if ngui.flex_row({0.25, 0.25, 0.25, 0.25}) {
-            if ngui.button("Prev") {
-                tmp_v1 -= {1, 1}
-            }
-            if ngui.button("Next") {
-                tmp_v1 += {1, 1}
-            }
-
-            ngui.vec2(&tmp_v1)
-            ngui.vec2(&tmp_v2, min = -50, max = 75, step = 1)
-        }
-
-        if ngui.flex_row({.2, .8}) {
-            ngui.labelf("Name:", align = .Right)
-            ngui.input(&my_str, label = "Name: ")
-        }
-        if ngui.flex_row({.6, .4,}) {
-            ngui.input(&my_other_str, label = "Maiden Name:")
-            ngui.labelf("%v", my_other_str, color = rl.DARKBLUE, align = .Left)
+            ngui.vec2(&level_grid.size, min = 0, step = 1)
         }
     }
 

@@ -8,8 +8,10 @@ import "entity"
 import "player"
 import "render"
 import "ngui"
+import "grid"
 
 timescale: f32 = 1.0
+level_grid: grid.Grid
 
 main :: proc() {
      when ODIN_DEBUG {
@@ -51,9 +53,10 @@ main :: proc() {
     // Player entity
     id := entity.create({ pos = {0, 0}, scale = 50 })
     player.player.ent_id = id
-    render.add(.FG, { id, .Circle, rl.RED })
+    // render.add(.FG, { id, .Circle, rl.RED })
 
     camera := rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
+    level_grid = grid.init({5, 4})
 
     rl.SetTargetFPS(120)
     for !rl.WindowShouldClose() {
@@ -62,6 +65,14 @@ main :: proc() {
         player_input := player.get_input()
         player.update(player_input, dt)
         render.draw(camera)
+
+        level_grid = grid.init(level_grid.size)
+        if x, ok := grid.hovered_cell(level_grid); ok {
+            rl.DrawRectangleV(x, {grid.CELL_SIZE, grid.CELL_SIZE}, rl.YELLOW)
+        }
+
+        grid.draw(level_grid)
+
 
         when ODIN_DEBUG {
             draw_gui()
