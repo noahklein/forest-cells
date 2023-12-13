@@ -9,6 +9,13 @@ import "entity"
 tmp_a, tmp_b : f32
 tmp_v1, tmp_v2 : rl.Vector2
 my_str, my_other_str: string
+my_bool : bool
+
+
+E :: enum{One, Two, Three, Four}
+e : E
+O :: enum{Foo, Bar}
+o : O
 
 draw_gui :: proc() {
     ngui.update()
@@ -61,8 +68,26 @@ draw_gui :: proc() {
             ngui.vec2(&player.player.vel, min = -MAX_SPEED, max = MAX_SPEED, step = 0.1)
             ngui.labelf("Vel")
         }
-    }
 
+        if ngui.flex_row({0.1, 0.9}) {
+            ngui.labelf("Choice", align = .Right)
+            ngui.radio_group(E, &e)
+        }
+
+        if ngui.flex_row({1}) {
+            if ngui.toggle("Checkbox", my_bool) {
+                my_bool = !my_bool
+            }
+        }
+
+        if ngui.flex_row({0.2, 0.3, 0.2, 0.3}) {
+            ngui.labelf("One", align = .Right)
+            ngui.radio_group(O, &o)
+
+            ngui.labelf("Two", align = .Right)
+            ngui.radio_group(O, &o)
+        }
+    }
 
     rl.DrawFPS(rl.GetScreenWidth() - 80, 0)
 }

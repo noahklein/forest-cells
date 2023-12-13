@@ -118,12 +118,8 @@ end_row :: proc() {
 COMPONENT_HEIGHT  :: TITLE_HEIGHT
 COMPONENT_PADDING :: rl.Vector2{5, 2}
 
-flex_rect :: proc() -> (rl.Rectangle, bool) {
-    p, p_ok := state.panels[state.panel]
-    if !p_ok {
-        return {}, false
-    }
-
+flex_rect :: proc(loc := #caller_location) -> (rl.Rectangle, bool) {
+    p := state.panels[state.panel] or_else panic("Must be called between begin_panel() and end_panel()", loc = loc)
     defer state.panel_column += 1
 
     row_rect := rl.Rectangle{

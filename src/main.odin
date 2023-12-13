@@ -9,7 +9,7 @@ import "player"
 import "render"
 import "ngui"
 
-timescale: f32
+timescale: f32 = 1.0
 
 main :: proc() {
      when ODIN_DEBUG {

@@ -4,6 +4,8 @@ import "core:math/linalg"
 import "core:fmt"
 import "core:strings"
 import "core:unicode/utf8"
+import "core:reflect"
+import "core:runtime"
 import rl "vendor:raylib"
 
 INF :: f32(1e7)
@@ -126,7 +128,8 @@ vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1) {
 // Draggable f32 editor. Hold alt while dragging for finer control, hold shift to speed it up.
 f32_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32 = 0.1) {
     key := fmt.ctprintf("f32#%v", rect)
-    if pressed(rect) {
+    press := pressed(rect)
+    if press {
         state.dragging = key
         state.drag_offset = rl.Vector2{rect.x, rect.y} - state.mouse
     }
@@ -138,8 +141,43 @@ f32_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32
         f^ = clamp(f^, min, max)
     }
 
-    rl.DrawRectangleRec(rect, button_color(hovered(rect), dragging))
+    rl.DrawRectangleRec(rect, button_color(hovered(rect), dragging, press))
     label_rect(rect, fmt.ctprintf("%.2f", f^), color = rl.WHITE, align = .Center)
+}
+
+radio_group :: proc($Enum: typeid, val: ^Enum) {
+    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    radio_group_rect(rect, Enum, val)
+}
+
+radio_group_rect :: proc(rect: rl.Rectangle, $Enum: typeid, val: ^Enum) {
+    fields := reflect.enum_fields_zipped(Enum)
+    fmt.assertf(len(fields) > 0, "enum_choice requires enum type with at least one member, enum = %v", typeid_of(Enum))
+
+    btn_rect := rect
+    btn_rect.width /= f32(len(fields))
+    for field in fields {
+        cstr := strings.clone_to_cstring(field.name, context.temp_allocator)
+        if toggle_rect(btn_rect, cstr, val^ == Enum(field.value)) {
+            val^ = Enum(field.value)
+        }
+
+        btn_rect.x += btn_rect.width
+    }
+}
+
+toggle :: proc(label: cstring, selected: bool) -> bool {
+    rect, _ := flex_rect()
+    return toggle_rect(rect, label, selected)
+}
+
+// Like a checkbox, a button that can be pressed and unpressed. Does not manage its own state.
+toggle_rect :: proc(rect: rl.Rectangle, label: cstring, selected: bool) -> bool {
+    hover := hovered(rect)
+    press := hover && rl.IsMouseButtonPressed(.LEFT)
+    rl.DrawRectangleRec(rect, button_color(hover, selected, press))
+    label_rect(rect, label, align = .Center)
+    return press
 }
 
 @(require_results)
