@@ -68,7 +68,8 @@ main :: proc() {
 
         level_grid = grid.init(level_grid.size)
         if x, ok := grid.hovered_cell(level_grid); ok {
-            rl.DrawRectangleV(x, {grid.CELL_SIZE, grid.CELL_SIZE}, rl.YELLOW)
+            mod: rl.Color = {10, 10, 0, 0} if rl.IsMouseButtonDown(.LEFT) else 0
+            rl.DrawRectangleV(x, {grid.CELL_SIZE, grid.CELL_SIZE}, rl.YELLOW - mod)
         }
 
         grid.draw(level_grid)
