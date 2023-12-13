@@ -6,7 +6,6 @@
             "type": "shell",
             "command": "odin build src -debug",
             // "command": "odin build src -debug 2>&1 >/dev/null | sed -e 's/\\.odin(/.odin:/g' 1>&2",
-            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true

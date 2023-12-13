@@ -18,6 +18,8 @@ NGui :: struct {
     dragging: cstring,
     drag_offset: rl.Vector2,
 
+    button_pressed: cstring,
+
     text_inputs: map[cstring]TextInput,
     active_input: cstring,
     last_keypress_time: f64,
@@ -98,14 +100,23 @@ button :: proc(label: cstring) -> bool {
 }
 
 button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
-    hovered := rl.CheckCollisionPointRec(rl.GetMousePosition(), rect)
-
-    rl.DrawRectangleRec(rect, button_color(hovered, hovered && rl.IsMouseButtonDown(.LEFT)))
-    if label != nil {
-        label_rect(rect, label, color = rl.WHITE, align = .Center)
+    hover := hovered(rect)
+    key := fmt.ctprintf("%s#button#%s", state.panel, label)
+    active := state.button_pressed == key
+    if hover && rl.IsMouseButtonPressed(.LEFT) {
+        state.button_pressed = key
+        active = true
     }
 
-    return hovered && rl.IsMouseButtonReleased(.LEFT)
+    // Draw button
+    rl.DrawRectangleRec(rect, button_color(hover, hover && rl.IsMouseButtonDown(.LEFT), active))
+    label_rect(rect, label, color = rl.WHITE, align = .Center)
+
+    // Button is only pressed if the user pressed down AND released in the rect.
+    release := active && rl.IsMouseButtonReleased(.LEFT)
+    if release do state.button_pressed = nil
+
+    return release && hover
 }
 
 
