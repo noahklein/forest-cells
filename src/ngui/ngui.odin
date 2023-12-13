@@ -60,6 +60,7 @@ update :: proc() {
     }
 
     assert(len(state.panels) <= 32, "Using more than 32 panels, is this intentional?")
+    assert(len(state.text_inputs) <= 32, "Using more than 32 text inputs, is this intentional?")
 }
 
 slider_rect :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32) {
