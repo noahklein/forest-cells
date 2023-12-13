@@ -1,6 +1,5 @@
 package player
 
-import "core:math/linalg"
 import rl "vendor:raylib"
 import "../entity"
 import "../ngui"

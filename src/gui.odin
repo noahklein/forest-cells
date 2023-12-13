@@ -1,6 +1,5 @@
 package main
 
-import "core:fmt"
 import rl "vendor:raylib"
 import "ngui"
 import "player"
@@ -23,13 +22,12 @@ draw_gui :: proc() {
     if ngui.begin_panel("Grid", {0, 0, 320, 0}) {
         if ngui.flex_row({0.25, 0.25, 0.5}) {
             if ngui.button("Less") {
-                level_grid.size -= 1
+                lvl._grid.size -= 1
             }
             if ngui.button("More") {
-                level_grid.size += 1
-
+                lvl._grid.size += 1
             }
-            ngui.vec2(&level_grid.size, min = 0, step = 1)
+            ngui.vec2(&lvl._grid.size, min = 0, step = 1)
         }
     }
 
@@ -47,25 +45,6 @@ draw_gui :: proc() {
             ngui.labelf("Pos")
             ngui.vec2(&player.player.vel, min = -MAX_SPEED, max = MAX_SPEED, step = 0.1)
             ngui.labelf("Vel")
-        }
-
-        if ngui.flex_row({0.1, 0.9}) {
-            ngui.labelf("Choice", align = .Right)
-            ngui.radio_group(E, &e)
-        }
-
-        if ngui.flex_row({1}) {
-            if ngui.toggle("Checkbox", my_bool) {
-                my_bool = !my_bool
-            }
-        }
-
-        if ngui.flex_row({0.2, 0.3, 0.2, 0.3}) {
-            ngui.labelf("One", align = .Right)
-            ngui.radio_group(O, &o)
-
-            ngui.labelf("Two", align = .Right)
-            ngui.radio_group(O, &o)
         }
     }
 

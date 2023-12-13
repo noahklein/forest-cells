@@ -3,9 +3,6 @@ package ngui
 import "core:math/linalg"
 import "core:fmt"
 import "core:strings"
-import "core:unicode/utf8"
-import "core:reflect"
-import "core:runtime"
 import rl "vendor:raylib"
 
 INF :: f32(1e7)
@@ -37,24 +34,22 @@ init :: proc() {
 
 deinit :: proc() {
     delete(state.panels)
-    for key, &ti in state.text_inputs {
+    for _, &ti in state.text_inputs {
         strings.builder_destroy(&ti.buf)
     }
     delete(state.text_inputs)
 }
 
 update :: proc() {
-    using state;
-
     screen := rl.Vector2{f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight())}
-    mouse = linalg.clamp(rl.GetMousePosition(), 0, screen)
+    state.mouse = linalg.clamp(rl.GetMousePosition(), 0, screen)
 
-    if dragging != nil && rl.IsMouseButtonUp(.LEFT) {
-        dragging = nil
+    if state.dragging != nil && rl.IsMouseButtonUp(.LEFT) {
+        state.dragging = nil
     }
 
-    if p, ok := &panels[dragging]; ok {
-        pos := mouse + drag_offset
+    if p, ok := &state.panels[state.dragging]; ok {
+        pos := state.mouse + state.drag_offset
         p.rect.x = pos.x
         p.rect.y = pos.y
     }

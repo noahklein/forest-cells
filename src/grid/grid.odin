@@ -1,5 +1,6 @@
 package grid
 
+import "core:math/linalg"
 import rl "vendor:raylib"
 
 Grid :: struct {
@@ -26,7 +27,8 @@ init :: proc(size: rl.Vector2) -> Grid {
 hovered_cell :: proc(using grid: Grid) -> (rl.Vector2, bool) {
     mouse := rl.GetMousePosition()
     // Exclude rectangle borders from collision.
-    collide := rect.x < mouse.x && mouse.x < rect.x + rect.width && rect.y < mouse.y && mouse.y < rect.y + rect.height
+    collide := (rect.x < mouse.x && mouse.x < rect.x + rect.width) &&
+               (rect.y < mouse.y && mouse.y < rect.y + rect.height)
     if  !collide {
         return 0, false
     }
@@ -47,6 +49,13 @@ draw :: proc(using grid: Grid) {
         row := rect.y + f32(y * CELL_SIZE)
         rl.DrawLineV({rect.x, row}, {rect.x + rect.width, row}, rl.BLACK)
     }
+}
+
+@(require_results)
+vec_to_int :: #force_inline proc(using g: Grid, v: rl.Vector2) -> [2]int {
+    origin := rl.Vector2{rect.x, rect.y}
+
+    return linalg.array_cast((v - origin) / CELL_SIZE, int)
 }
 
 @(require_results)

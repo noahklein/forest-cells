@@ -1,7 +1,6 @@
 package render
 
 import rl "vendor:raylib"
-import "core:testing"
 
 import "../entity"
 

@@ -1,10 +1,8 @@
 package ngui
 
 import rl "vendor:raylib"
-import "core:fmt"
 import "core:math"
 import "core:math/linalg"
-import "core:time"
 
 FONT :: 10
 TEXT_COLOR :: rl.WHITE
