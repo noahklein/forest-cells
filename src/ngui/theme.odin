@@ -23,7 +23,7 @@ INPUT_CURSOR_WIDTH  :: 5
 SLIDER_WIDTH :: 16
 
 button_color :: proc(hover, active: bool, press := false) -> rl.Color {
-    mod: rl.Color = {10, 0, 0, 0} if press else 0
+    mod: rl.Color = {10, 10, 0, 0} if press else 0
     if active {
         return ACTIVE_BUTTON_COLOR + mod
     } else if hover {
@@ -69,11 +69,4 @@ lerp_color :: proc(ac, bc: rl.Color, t: f32) -> rl.Color {
     v := linalg.lerp(a, b, t)
 
     return rl.Color(linalg.array_cast(v, u8))
-}
-
-color_to_vec :: proc(c: rl.Color) -> [4]f32 {
-    return {
-        f32(c.r) / 255, f32(c.g) / 255,
-        f32(c.b) / 255, f32(c.a) / 255,
-    }
 }
