@@ -109,7 +109,8 @@ button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
     }
 
     // Draw button
-    rl.DrawRectangleRec(rect, button_color(hover, hover && rl.IsMouseButtonDown(.LEFT), active))
+    color := button_color(hover, active, hover && rl.IsMouseButtonDown(.LEFT))
+    rl.DrawRectangleRec(rect, color)
     label_rect(rect, label, color = rl.WHITE, align = .Center)
 
     // Button is only pressed if the user pressed down AND released in the rect.

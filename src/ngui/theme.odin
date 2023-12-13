@@ -23,7 +23,7 @@ INPUT_CURSOR_WIDTH  :: 5
 SLIDER_WIDTH :: 16
 
 button_color :: proc(hover, active: bool, press := false) -> rl.Color {
-    mod: rl.Color = {30, 30, 30, 0} if press else 0
+    mod: rl.Color = {10, 0, 0, 0} if press else 0
     if active {
         return ACTIVE_BUTTON_COLOR + mod
     } else if hover {
