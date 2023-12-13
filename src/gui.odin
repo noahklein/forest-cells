@@ -87,7 +87,10 @@ draw_gui :: proc() {
             ngui.labelf("Two", align = .Right)
             ngui.radio_group(O, &o)
         }
+
     }
+
+            ngui.radio_group(O, &o)
 
     rl.DrawFPS(rl.GetScreenWidth() - 80, 0)
 }

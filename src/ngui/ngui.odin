@@ -90,12 +90,12 @@ slider_rect :: proc(rect: rl.Rectangle, val: ^f32, $low, $high: f32) {
 }
 
 slider :: proc(val: ^f32, $low, $high: f32) {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect := flex_rect()
     slider_rect(rect, val, low, high)
 }
 
 button :: proc(label: cstring) -> bool {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect := flex_rect()
     return button_rect(rect, label)
 }
 
@@ -121,7 +121,7 @@ button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
 
 
 vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1) {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect := flex_rect()
     rect.width /= 2
 
     first := rect
@@ -157,7 +157,7 @@ f32_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32
 }
 
 radio_group :: proc($Enum: typeid, val: ^Enum) {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect := flex_rect()
     radio_group_rect(rect, Enum, val)
 }
 
@@ -178,7 +178,7 @@ radio_group_rect :: proc(rect: rl.Rectangle, $Enum: typeid, val: ^Enum) {
 }
 
 toggle :: proc(label: cstring, selected: bool) -> bool {
-    rect, _ := flex_rect()
+    rect := flex_rect()
     return toggle_rect(rect, label, selected)
 }
 

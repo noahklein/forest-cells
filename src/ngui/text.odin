@@ -15,7 +15,7 @@ TextAlign :: enum {
 }
 
 labelf :: proc($format: string, args: ..any, color := TEXT_COLOR, align := TextAlign.Left) {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect := flex_rect()
 
     text := fmt.ctprintf(format, ..args)
     label_rect(rect, text, color, align)
@@ -35,7 +35,7 @@ label_rect :: proc(rect: rl.Rectangle, text: cstring, color := TEXT_COLOR, align
 }
 
 input :: proc(text: ^string, $label: cstring) {
-    rect := flex_rect() or_else panic("Must be called between begin_panel() and end_panel()")
+    rect := flex_rect()
     input_rect(rect, text, label)
 }
 
