@@ -3,6 +3,7 @@ package ngui
 import "core:math/linalg"
 import "core:fmt"
 import "core:strings"
+import "core:reflect"
 import rl "vendor:raylib"
 
 INF :: f32(1e7)
@@ -170,6 +171,33 @@ radio_group_rect :: proc(rect: rl.Rectangle, $Enum: typeid, val: ^Enum) {
             val^ = Enum(field.value)
         }
 
+        btn_rect.x += btn_rect.width
+    }
+}
+
+flags :: proc(bs: ^$B/bit_set[$T]) {
+    rect := flex_rect()
+    flags_rect(rect, bs)
+}
+
+flags_rect :: proc(rect: rl.Rectangle, bs: ^$B/bit_set[$Enum]) {
+    fields := reflect.enum_fields_zipped(Enum)
+    fmt.assertf(len(fields) > 0, #procedure + " requires enum type with at least one member, enum = %v", typeid_of(Enum))
+
+    btn_rect := rect
+    btn_rect.width /= f32(len(fields))
+    for field in fields {
+        cstr := strings.clone_to_cstring(field.name, context.temp_allocator)
+        val := Enum(field.value)
+        enabled := val in bs
+        if toggle_rect(btn_rect, cstr, enabled) {
+            if enabled {
+                bs^ -= {val}
+            } else {
+                bs^ += {val}
+            }
+
+        }
         btn_rect.x += btn_rect.width
     }
 }

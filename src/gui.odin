@@ -16,6 +16,8 @@ e : E
 O :: enum{Foo, Bar}
 o : O
 
+bs : bit_set[E]
+
 draw_gui :: proc() {
     ngui.update()
 
@@ -28,6 +30,10 @@ draw_gui :: proc() {
                 lvl._grid.size += 1
             }
             ngui.vec2(&lvl._grid.size, min = 0, step = 1)
+        }
+
+        if ngui.flex_row({1}) {
+            ngui.flags(&bs)
         }
     }
 
