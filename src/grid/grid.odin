@@ -20,7 +20,7 @@ init :: proc(pos, size: rl.Vector2) -> Grid {
         line := entity.Line{ end = { column, pos.y + g_height }}
         entity.create({
             pos = {column, pos.y},
-            graphic = entity.Graphic{ tint = rl.BLACK, shape = line },
+            graphic = { .UI, rl.BLACK, line },
         })
     }
 
@@ -30,7 +30,7 @@ init :: proc(pos, size: rl.Vector2) -> Grid {
         line := entity.Line{ end = { pos.x + g_width, row }}
         entity.create({
             pos = {pos.x, row},
-            graphic = { tint = rl.BLACK, shape = line },
+            graphic = { .UI, rl.BLACK, line },
         })
     }
 

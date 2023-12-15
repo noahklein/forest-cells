@@ -3,6 +3,7 @@ package entity
 import rl "vendor:raylib"
 
 Graphic :: struct {
+    layer: Layer,
     tint: rl.Color,
     shape: Shape,
 }
@@ -30,7 +31,7 @@ draw :: proc(camera: rl.Camera2D) {
 }
 
 draw_layer :: proc(layer: Layer) {
-    for ent, i in data.ents do if ent.age == data.ages[i] {
+    for ent, i in data.ents do if ent.age == data.ages[i] && ent.graphic.layer == layer {
         switch s in ent.graphic.shape {
             case NoShape: continue
             case Circle: rl.DrawCircleV(ent.pos, s.radius, ent.graphic.tint)

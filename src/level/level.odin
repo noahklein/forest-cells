@@ -22,7 +22,7 @@ init :: proc(size: rl.Vector2) -> (lvl: Level) {
     for &tile, i in lvl.data {
         tile.ent_id = entity.create({
             pos = grid.int_to_vec(lvl.grid, i),
-            graphic = {TILE_COLORS[.Empty], entity.Rect{grid.CELL_SIZE}},
+            graphic = {.BG, TILE_COLORS[.Empty], entity.Rect{grid.CELL_SIZE}},
         })
     }
 
@@ -58,10 +58,12 @@ tick :: proc(level: ^Level, dt: f32) {
                     if !grid.in_bounds(level.grid, target) do continue
 
                     nbr_i := grid.ivec_to_int(level.grid, target)
+                    nbr_tile := &level.data[nbr_i]
 
-                    switch level.data[nbr_i].type {
+                    switch nbr_tile.type {
                         case .Empty:
-                            level.data[nbr_i].type = .Water
+                            nbr_tile.type = .Water
+                            set_ent_type(nbr_tile.ent_id, .Water)
                         case .Dirt, .Water:
                     }
 
@@ -82,14 +84,16 @@ handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
 
     if rl.IsMouseButtonPressed(.LEFT) {
         i := grid.vec_to_int(level.grid, cell)
-        if level.data[i].ent_id == {0, 0} {
+        ent_id := level.data[i].ent_id
+        if ent_id == {0, 0} {
             fmt.println("fresh", i, grid.vec_to_ivec(level.grid, cell))
             id := entity.create(entity.Entity{
                 pos = cell,
-                graphic = {TILE_COLORS[level.brush], entity.Rect{grid.CELL_SIZE}},
+                graphic = {.BG, TILE_COLORS[level.brush], entity.Rect{grid.CELL_SIZE}},
             })
         } else {
-            // render.edit(.BG, id, render.Graphic{id, })
+            level.data[i].type = level.brush
+            set_ent_type(ent_id, level.brush)
         }
     }
 
@@ -98,7 +102,12 @@ handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
 
 draw :: proc(level: Level) {
     if level.hovered != -1 {
-        green := rl.Color{0, 255, 0, 50}
+        green := rl.Color{0, 255, 0, 60}
         rl.DrawRectangleV(level.hovered, grid.CELL_SIZE, green)
     }
+}
+
+set_ent_type :: proc(ent_id: entity.Id, type: TileType, loc:=#caller_location) {
+    ent := entity.get(ent_id) or_else panic(#procedure + "() missing entity", loc)
+    ent.graphic.tint = TILE_COLORS[type]
 }
