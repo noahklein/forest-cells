@@ -56,7 +56,7 @@ input_color :: proc(hover, active: bool) -> rl.Color {
 }
 
 // Blinks between white and non_white.
-cursor_color :: proc(non_white := rl.BLUE) -> rl.Color {
+cursor_color :: proc(non_white := rl.SKYBLUE) -> rl.Color {
     now := rl.GetTime()
     t := math.cos(2 * (now - state.last_keypress_time))
     t *= t

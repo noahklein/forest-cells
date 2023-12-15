@@ -103,13 +103,17 @@ input_rect :: proc(rect: rl.Rectangle, text: ^string, label: cstring) {
     text^ = strings.to_string(input.buf)
     cstr := strings.clone_to_cstring(text^, context.temp_allocator)
     text_box := padding(rect, {INPUT_PAD, INPUT_PAD})
-    text_rect(text_box, cstr)
+    text_rect(text_box, cstr, color = TEXT_COLOR)
 
     // Cursor
     if active {
-        cursor_rect := text_box
-        cursor_rect.x += f32(rl.MeasureText(cstr, FONT))
-        cursor_rect.width = INPUT_CURSOR_WIDTH
+        CURSOR_HEIGHT :: FONT + 1
+        cursor_rect := rl.Rectangle{
+            text_box.x + f32(rl.MeasureText(cstr, FONT) + 2),
+            text_box.y + text_box.height / 2 - CURSOR_HEIGHT / 2,
+            INPUT_CURSOR_WIDTH,
+            CURSOR_HEIGHT,
+        }
         rl.DrawRectangleRec(cursor_rect, cursor_color())
     }
 }
