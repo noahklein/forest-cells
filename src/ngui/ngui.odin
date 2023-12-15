@@ -108,7 +108,7 @@ button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
     // Draw button
     color := button_color(hover, active, hover && rl.IsMouseButtonDown(.LEFT))
     rl.DrawRectangleRec(rect, color)
-    label_rect(rect, label, color = rl.WHITE, align = .Center)
+    text_rect(rect, label, color = rl.WHITE, align = .Center)
 
     // Button is only pressed if the user pressed down AND released in the rect.
     release := active && rl.IsMouseButtonReleased(.LEFT)
@@ -138,10 +138,9 @@ float :: proc(f: ^f32, min := -INF, max := INF, step: f32 = 0.1, label: cstring 
 
 // Draggable f32 editor. Hold alt while dragging for finer control, hold shift to speed it up.
 float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32 = 0.1, label: cstring = nil) {
-    rect := rect
-    if label != nil {
-        rect.height -= LABEL_HEIGHT
-        rect.y += LABEL_HEIGHT
+    label_box, float_box := rect, rl.Rectangle{}
+    if label != nil  {
+        label_box, float_box = label_split_rect(rect)
     }
 
     key := fmt.ctprintf("f32#%v", rect)
@@ -159,14 +158,10 @@ float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f
     }
 
 
-    rl.DrawRectangleRec(rect, button_color(hovered(rect), dragging, press))
-    label_rect(rect, fmt.ctprintf("%.2f", f^), color = rl.WHITE, align = .Center)
+    rl.DrawRectangleRec(float_box, button_color(hovered(rect), dragging, press))
+    text_rect(float_box, fmt.ctprintf("%.2f", f^), color = rl.WHITE, align = .Center)
     if label != nil {
-        text_rect := rect
-        text_rect.height = LABEL_HEIGHT
-        text_rect.y -= LABEL_HEIGHT // We moved the float rect down earlier.
-                                    // Move the label back up
-        label_rect(text_rect, label)
+        text_rect(label_box, label)
     }
 }
 
@@ -228,8 +223,22 @@ toggle_rect :: proc(rect: rl.Rectangle, label: cstring, selected: bool) -> bool 
     hover := hovered(rect)
     press := hover && rl.IsMouseButtonPressed(.LEFT)
     rl.DrawRectangleRec(rect, button_color(hover, selected, press))
-    label_rect(rect, label, align = .Center)
+    text_rect(rect, label, align = .Center)
     return press
+}
+
+
+// Splits a rectangle up into its label and body components.
+@(require_results)
+label_split_rect :: proc(rect: rl.Rectangle) -> (text, body: rl.Rectangle) {
+    text = rect
+    text.height = LABEL_HEIGHT
+
+    body = rect
+    body.height -= LABEL_HEIGHT
+    body.y += LABEL_HEIGHT
+
+    return
 }
 
 @(require_results)

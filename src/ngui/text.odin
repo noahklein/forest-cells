@@ -14,14 +14,14 @@ TextAlign :: enum {
     Right,
 }
 
-labelf :: proc($format: string, args: ..any, color := DARK_TEXT_COLOR, align := TextAlign.Left) {
+text :: proc($format: string, args: ..any, color := DARK_TEXT_COLOR, align := TextAlign.Left) {
     rect := flex_rect()
 
     text := fmt.ctprintf(format, ..args)
-    label_rect(rect, text, color, align)
+    text_rect(rect, text, color, align)
 }
 
-label_rect :: proc(rect: rl.Rectangle, text: cstring, color := DARK_TEXT_COLOR, align := TextAlign.Left) {
+text_rect :: proc(rect: rl.Rectangle, text: cstring, color := DARK_TEXT_COLOR, align := TextAlign.Left) {
     y := rect.y + (rect.height / 2) - (f32(FONT) / 2)
 
     x : f32
@@ -102,12 +102,12 @@ input_rect :: proc(rect: rl.Rectangle, text: ^string, label: cstring) {
 
     text^ = strings.to_string(input.buf)
     cstr := strings.clone_to_cstring(text^, context.temp_allocator)
-    text_rect := padding(rect, {INPUT_PAD, INPUT_PAD})
-    label_rect(text_rect, cstr)
+    text_box := padding(rect, {INPUT_PAD, INPUT_PAD})
+    text_rect(text_box, cstr)
 
     // Cursor
     if active {
-        cursor_rect := text_rect
+        cursor_rect := text_box
         cursor_rect.x += f32(rl.MeasureText(cstr, FONT))
         cursor_rect.width = INPUT_CURSOR_WIDTH
         rl.DrawRectangleRec(cursor_rect, cursor_color())
