@@ -62,8 +62,8 @@ draw_layer :: proc(layer: Layer) {
         gfx := graphics[i]
         switch s in graphics[i].shape {
         case Circle: rl.DrawCircleV(ent.pos, s.radius, gfx.tint)
-        case Line: rl.DrawLineV(ent.pos, s.end, gfx.tint)
-        case Rect: rl.DrawRectangleV(ent.pos, s.size, gfx.tint)
+        case Line:   rl.DrawLineV(ent.pos, s.end, gfx.tint)
+        case Rect:   rl.DrawRectangleV(ent.pos, s.size, gfx.tint)
         }
     }
 }
