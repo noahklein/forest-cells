@@ -52,9 +52,9 @@ main :: proc() {
     defer render.deinit()
 
     // Player entity
-    player_id := entity.create({ pos = {0, 0}, scale = 50 })
+    player_id := entity.create({ pos = {0, 0} })
     player.player.ent_id = player_id
-    render.add(.FG, { player_id, rl.RED, render.Circle{}})
+    render.add(.FG, { player_id, rl.RED, render.Circle{radius = 50}})
 
     camera = rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
     lvl := level.init({5, 4})

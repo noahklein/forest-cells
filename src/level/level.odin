@@ -51,9 +51,9 @@ handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
         i := grid.vec_to_int(level.grid, cell)
         if level.data[i].ent_id == {0, 0} {
             fmt.println("fresh", i, grid.vec_to_ivec(level.grid, cell))
-            id := entity.create(entity.Entity{ pos = cell, scale = 50 })
+            id := entity.create(entity.Entity{ pos = cell })
             level.data[i] = Tile{ ent_id = id, type = Dirt{} }
-            render.add(.FG, render.Graphic{id, rl.ORANGE, render.Circle{} })
+            render.add(.FG, render.Graphic{id, rl.ORANGE, render.Rect{size = grid.CELL_SIZE} })
         }
     }
 
@@ -62,6 +62,7 @@ handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
 
 draw :: proc(level: Level) {
     if level.hovered != -1 {
-        rl.DrawRectangleV(level.hovered, grid.CELL_SIZE, rl.GREEN)
+        green := rl.Color{0, 255, 0, 50}
+        rl.DrawRectangleV(level.hovered, grid.CELL_SIZE, green)
     }
 }

@@ -2,7 +2,7 @@ package main
 
 import rl "vendor:raylib"
 import "ngui"
-import "entity"
+// import "entity"
 
 str: string
 Radio :: enum {

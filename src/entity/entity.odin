@@ -11,7 +11,7 @@ Entity :: struct {
 
 Transform :: struct {
     pos: rl.Vector2,
-    rot, scale: f32,
+    rot: f32,
 }
 
 Id :: struct {

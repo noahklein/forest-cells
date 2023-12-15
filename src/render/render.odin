@@ -15,10 +15,12 @@ Graphic :: struct {
 Shape :: union {
     Circle,
     Line,
+    Rect,
 }
 
-Circle :: struct{}
-Line :: struct{ end: rl.Vector2 }
+Circle :: struct{ radius: f32 }
+Line   :: struct{ end:  rl.Vector2 }
+Rect   :: struct{ size: rl.Vector2 }
 
 Layer :: enum u8 { BG, FG, UI }
 
@@ -59,8 +61,9 @@ draw_layer :: proc(layer: Layer) {
 
         gfx := graphics[i]
         switch s in graphics[i].shape {
-        case Circle: rl.DrawCircleV(ent.pos, ent.scale, gfx.tint)
+        case Circle: rl.DrawCircleV(ent.pos, s.radius, gfx.tint)
         case Line: rl.DrawLineV(ent.pos, s.end, gfx.tint)
+        case Rect: rl.DrawRectangleV(ent.pos, s.size, gfx.tint)
         }
     }
 }
