@@ -4,12 +4,16 @@ import rl "vendor:raylib"
 import "core:math"
 import "core:math/linalg"
 
-FONT :: 10
+FONT :: 11
 TEXT_COLOR :: rl.WHITE
+// DARK_TEXT_COLOR :: rl.BLACK
+DARK_TEXT_COLOR :: DEFAULT_BUTTON_COLOR
 
 TITLE_FONT :: 11
-TITLE_HEIGHT :: 24
+TITLE_HEIGHT :: 26
 TITLE_COLOR :: rl.MAROON
+
+LABEL_HEIGHT :: FONT + 2
 
 DEFAULT_BUTTON_COLOR :: rl.DARKBLUE
 HOVER_BUTTON_COLOR   :: rl.BLUE

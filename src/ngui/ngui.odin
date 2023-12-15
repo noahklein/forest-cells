@@ -118,29 +118,32 @@ button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
 }
 
 
-vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1) {
+vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1, label: cstring = nil) {
     rect := flex_rect()
     rect.width /= 2
 
     first := rect
-    float_rect(first, &v.x, min, max, step)
+    float_rect(first, &v.x, min, max, step, label)
 
     second := rect
     second.x += rect.width
-    float_rect(second, &v.y, min, max, step)
-
-    // Divider line.
-    divider := rl.Vector2{second.x, second.y + COMPONENT_PADDING.y}
-    rl.DrawLineV(divider, divider + {0, rect.height - 2 * COMPONENT_PADDING.y}, rl.WHITE)
+    second_label: cstring = " " if label != nil else nil // empty label to pad height.
+    float_rect(second, &v.y, min, max, step, second_label)
 }
 
-float :: proc(f: ^f32, min := -INF, max := INF, step: f32 = 0.1) {
+float :: proc(f: ^f32, min := -INF, max := INF, step: f32 = 0.1, label: cstring = nil) {
     rect := flex_rect()
-    float_rect(rect, f, min = min, max = max, step = step)
+    float_rect(rect, f, min = min, max = max, step = step, label = label)
 }
 
 // Draggable f32 editor. Hold alt while dragging for finer control, hold shift to speed it up.
-float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32 = 0.1) {
+float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32 = 0.1, label: cstring = nil) {
+    rect := rect
+    if label != nil {
+        rect.height -= LABEL_HEIGHT
+        rect.y += LABEL_HEIGHT
+    }
+
     key := fmt.ctprintf("f32#%v", rect)
     press := pressed(rect)
     if press {
@@ -155,8 +158,16 @@ float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f
         f^ = clamp(f^, min, max)
     }
 
+
     rl.DrawRectangleRec(rect, button_color(hovered(rect), dragging, press))
     label_rect(rect, fmt.ctprintf("%.2f", f^), color = rl.WHITE, align = .Center)
+    if label != nil {
+        text_rect := rect
+        text_rect.height = LABEL_HEIGHT
+        text_rect.y -= LABEL_HEIGHT // We moved the float rect down earlier.
+                                    // Move the label back up
+        label_rect(text_rect, label)
+    }
 }
 
 radio_group :: proc($Enum: typeid, val: ^Enum) {

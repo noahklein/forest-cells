@@ -14,14 +14,14 @@ TextAlign :: enum {
     Right,
 }
 
-labelf :: proc($format: string, args: ..any, color := TEXT_COLOR, align := TextAlign.Left) {
+labelf :: proc($format: string, args: ..any, color := DARK_TEXT_COLOR, align := TextAlign.Left) {
     rect := flex_rect()
 
     text := fmt.ctprintf(format, ..args)
     label_rect(rect, text, color, align)
 }
 
-label_rect :: proc(rect: rl.Rectangle, text: cstring, color := TEXT_COLOR, align := TextAlign.Left) {
+label_rect :: proc(rect: rl.Rectangle, text: cstring, color := DARK_TEXT_COLOR, align := TextAlign.Left) {
     y := rect.y + (rect.height / 2) - (f32(FONT) / 2)
 
     x : f32

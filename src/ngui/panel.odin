@@ -115,7 +115,7 @@ end_row :: proc() {
     state.panel_row += 1
 }
 
-COMPONENT_HEIGHT  :: TITLE_HEIGHT
+COMPONENT_HEIGHT  :: TITLE_HEIGHT * 1.5
 COMPONENT_PADDING :: rl.Vector2{5, 2}
 
 flex_rect :: proc(loc := #caller_location) -> rl.Rectangle {
@@ -130,7 +130,8 @@ flex_rect :: proc(loc := #caller_location) -> rl.Rectangle {
     }
     row_rect = padding(row_rect, COMPONENT_PADDING)
 
-    fmt.assertf(state.panel_column < len(state.column_widths), "Too many components in row. Must be 1:1 with row's column widths: Panel = %s, row = %v", state.panel, state.panel_row)
+    fmt.assertf(state.panel_column < len(state.column_widths),
+                "Too many components in row. Must be 1:1 with row's column widths: Panel = %s, row = %v", state.panel, state.panel_row)
 
     rect := row_rect
     rect.width = row_rect.width * state.column_widths[state.panel_column] - COMPONENT_PADDING.x
