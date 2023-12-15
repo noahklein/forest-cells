@@ -5,8 +5,6 @@ import "core:mem"
 import rl "vendor:raylib"
 
 import "entity"
-import "player"
-import "render"
 import "ngui"
 import "level"
 
@@ -48,33 +46,27 @@ main :: proc() {
     NUM_ENTITIES :: 128 // Just a projection to pre-allocate.
     entity.init(NUM_ENTITIES)
     defer entity.deinit()
-    render.init(NUM_ENTITIES)
-    defer render.deinit()
-
-    // Player entity
-    player_id := entity.create({ pos = {0, 0} })
-    player.player.ent_id = player_id
-    render.add(.FG, { player_id, rl.RED, render.Circle{radius = 50}})
 
     camera = rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
     lvl := level.init({5, 4})
     defer level.deinit(lvl)
+    camera.target = {
+        lvl.grid.rect.x + lvl.grid.rect.width / 2,
+        lvl.grid.rect.y + lvl.grid.rect.height / 2,
+    }
 
     rl.SetTargetFPS(120)
     for !rl.WindowShouldClose() {
         dt := rl.GetFrameTime() * timescale
-
-        player_input := player.get_input()
-        player.update(player_input, dt)
-        cam_follow(&camera, player_id, dt)
 
         mouse := rl.GetScreenToWorld2D(rl.GetMousePosition(), camera)
         level.update(&lvl, dt, mouse)
 
         rl.BeginDrawing()
         defer rl.EndDrawing()
+        rl.ClearBackground(rl.WHITE)
 
-        render.draw(camera)
+        entity.draw(camera)
         rl.BeginMode2D(camera)
             level.draw(lvl)
         rl.EndMode2D()

@@ -23,5 +23,4 @@ TILE_COLORS := [TileType]rl.Color{
     .Empty = rl.BLACK,
     .Dirt  = rl.BROWN,
     .Water = rl.BLUE,
-
 }

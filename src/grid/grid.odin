@@ -3,7 +3,6 @@ package grid
 import "core:math/linalg"
 import rl "vendor:raylib"
 import "../entity"
-import "../render"
 
 Grid :: struct {
     size: rl.Vector2,
@@ -15,21 +14,24 @@ CELL_SIZE :: 50
 init :: proc(pos, size: rl.Vector2) -> Grid {
     g_width, g_height := size.x * CELL_SIZE, size.y * CELL_SIZE
 
+    // Vertical lines.
     for x in 0..=size.x {
         column := pos.x + f32(x * CELL_SIZE)
-        id := entity.create({
+        line := entity.Line{ end = { column, pos.y + g_height }}
+        entity.create({
             pos = {column, pos.y},
+            graphic = entity.Graphic{ tint = rl.BLACK, shape = line },
         })
-        line := render.Line{ end = {column, pos.y + g_height}}
-        render.add(.UI, render.Graphic{id, rl.BLACK, line})
     }
+
+    // Horizontal lines.
     for y in 0..=size.y {
         row := pos.y + f32(y * CELL_SIZE)
-        id := entity.create({
+        line := entity.Line{ end = { pos.x + g_width, row }}
+        entity.create({
             pos = {pos.x, row},
+            graphic = { tint = rl.BLACK, shape = line },
         })
-        line := render.Line{ end = {pos.x + g_width, row}}
-        render.add(.UI, {id, rl.BLACK, line})
     }
 
     return {
@@ -49,19 +51,6 @@ hovered_cell :: proc(using grid: Grid, mouse: rl.Vector2) -> (rl.Vector2, bool) 
     // Snap down to top-left corner of hovered cell.
     origin := rl.Vector2{rect.x, rect.y}
     return snap_down(mouse - origin) + origin, true
-}
-
-draw :: proc(using grid: Grid) {
-    // Vertical lines.
-    for x in 0..=size.x {
-        column := rect.x + f32(x * CELL_SIZE)
-        rl.DrawLineV({column, rect.y}, {column, rect.y + rect.height}, rl.BLACK)
-    }
-    // Horizontal lines.
-    for y in 0..=size.y {
-        row := rect.y + f32(y * CELL_SIZE)
-        rl.DrawLineV({rect.x, row}, {rect.x + rect.width, row}, rl.BLACK)
-    }
 }
 
 @(require_results)

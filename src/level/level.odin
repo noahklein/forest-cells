@@ -4,7 +4,6 @@ import "core:fmt"
 import rl "vendor:raylib"
 import "../grid"
 import "../entity"
-import "../render"
 
 FIXED_DT :: 1 // seconds
 
@@ -23,9 +22,8 @@ init :: proc(size: rl.Vector2) -> (lvl: Level) {
     for &tile, i in lvl.data {
         tile.ent_id = entity.create({
             pos = grid.int_to_vec(lvl.grid, i),
+            graphic = {TILE_COLORS[.Empty], entity.Rect{grid.CELL_SIZE}},
         })
-
-        render.add(.BG, {tile.ent_id, TILE_COLORS[.Empty], render.Rect{ size = grid.CELL_SIZE }})
     }
 
     lvl.hovered = -1
@@ -86,9 +84,10 @@ handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
         i := grid.vec_to_int(level.grid, cell)
         if level.data[i].ent_id == {0, 0} {
             fmt.println("fresh", i, grid.vec_to_ivec(level.grid, cell))
-            id := entity.create(entity.Entity{ pos = cell })
-            level.data[i] = Tile{ ent_id = id, type = level.brush }
-            render.add(.BG, render.Graphic{id, TILE_COLORS[level.brush], render.Rect{grid.CELL_SIZE} })
+            id := entity.create(entity.Entity{
+                pos = cell,
+                graphic = {TILE_COLORS[level.brush], entity.Rect{grid.CELL_SIZE}},
+            })
         } else {
             // render.edit(.BG, id, render.Graphic{id, })
         }
