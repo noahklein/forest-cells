@@ -6,6 +6,13 @@ import "player"
 import "entity"
 
 str: string
+E :: enum {
+    One,
+    Two,
+    Three,
+}
+e: E
+bs1, bs2: bit_set[E]
 
 draw_gui :: proc() {
     ngui.update()
@@ -32,6 +39,16 @@ draw_gui :: proc() {
 
         if ngui.flex_row({1}) {
             ngui.input(&str, "Input")
+        }
+
+        if ngui.flex_row({0.5, 0.5}) {
+            ngui.flags(&bs1, label = "Checkbox")
+            ngui.flags(&bs2)
+        }
+
+        if ngui.flex_row({0.5, 0.5}) {
+            ngui.radio_group(E, &e, label = "Radio")
+            ngui.radio_group(E, &e)
         }
     }
 

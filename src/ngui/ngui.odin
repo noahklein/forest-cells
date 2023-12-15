@@ -4,6 +4,7 @@ import "core:math/linalg"
 import "core:fmt"
 import "core:strings"
 import "core:reflect"
+import "core:intrinsics"
 import rl "vendor:raylib"
 
 INF :: f32(1e7)
@@ -138,10 +139,7 @@ float :: proc(f: ^f32, min := -INF, max := INF, step: f32 = 0.1, label: cstring 
 
 // Draggable f32 editor. Hold alt while dragging for finer control, hold shift to speed it up.
 float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32 = 0.1, label: cstring = nil) {
-    label_box, float_box := rect, rl.Rectangle{}
-    if label != nil  {
-        label_box, float_box = label_split_rect(rect)
-    }
+    label_box, float_box := label_split_rect(rect, label)
 
     key := fmt.ctprintf("f32#%v", rect)
     press := pressed(rect)
@@ -165,16 +163,18 @@ float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f
     }
 }
 
-radio_group :: proc($Enum: typeid, val: ^Enum) {
+// radio_group :: proc($Enum: typeid, val: ^Enum, label: cstring = nil) where intrinsics.type_is_enum(Enum) {
+radio_group :: proc($Enum: typeid, val: ^Enum, label: cstring = nil) {
     rect := flex_rect()
-    radio_group_rect(rect, Enum, val)
+    radio_group_rect(rect, Enum, val, label)
 }
 
-radio_group_rect :: proc(rect: rl.Rectangle, $Enum: typeid, val: ^Enum) {
+radio_group_rect :: proc(rect: rl.Rectangle, $Enum: typeid, val: ^Enum, label: cstring = nil)
+                        where intrinsics.type_is_enum(Enum) && len(Enum) > 0 {
     fields := reflect.enum_fields_zipped(Enum)
-    fmt.assertf(len(fields) > 0, "enum_choice requires enum type with at least one member, enum = %v", typeid_of(Enum))
 
-    btn_rect := rect
+    label_rect, btn_rect := label_split_rect(rect, label)
+
     btn_rect.width /= f32(len(fields))
     for field in fields {
         cstr := strings.clone_to_cstring(field.name, context.temp_allocator)
@@ -184,18 +184,22 @@ radio_group_rect :: proc(rect: rl.Rectangle, $Enum: typeid, val: ^Enum) {
 
         btn_rect.x += btn_rect.width
     }
+
+    if label != nil {
+        text_rect(label_rect, label)
+    }
 }
 
-flags :: proc(bs: ^$B/bit_set[$T]) {
+flags :: proc(bs: ^$B/bit_set[$Enum], label: cstring = nil) {
     rect := flex_rect()
-    flags_rect(rect, bs)
+    flags_rect(rect, bs, label)
 }
 
-flags_rect :: proc(rect: rl.Rectangle, bs: ^$B/bit_set[$Enum]) {
+flags_rect :: proc(rect: rl.Rectangle, bs: ^$B/bit_set[$Enum], label: cstring = nil)
+                where intrinsics.type_is_enum(Enum) && len(Enum) > 0 {
     fields := reflect.enum_fields_zipped(Enum)
-    fmt.assertf(len(fields) > 0, #procedure + " requires enum type with at least one member, enum = %v", typeid_of(Enum))
+    label_rect, btn_rect := label_split_rect(rect, label)
 
-    btn_rect := rect
     btn_rect.width /= f32(len(fields))
     for field in fields {
         cstr := strings.clone_to_cstring(field.name, context.temp_allocator)
@@ -211,6 +215,10 @@ flags_rect :: proc(rect: rl.Rectangle, bs: ^$B/bit_set[$Enum]) {
         }
         btn_rect.x += btn_rect.width
     }
+
+    if label != nil {
+        text_rect(label_rect, label)
+    }
 }
 
 toggle :: proc(label: cstring, selected: bool) -> bool {
@@ -222,15 +230,20 @@ toggle :: proc(label: cstring, selected: bool) -> bool {
 toggle_rect :: proc(rect: rl.Rectangle, label: cstring, selected: bool) -> bool {
     hover := hovered(rect)
     press := hover && rl.IsMouseButtonPressed(.LEFT)
-    rl.DrawRectangleRec(rect, button_color(hover, selected, press))
-    text_rect(rect, label, align = .Center)
+    held := hover && rl.IsMouseButtonDown(.LEFT)
+    rl.DrawRectangleRec(rect, button_color(hover, selected, held))
+    text_rect(rect, label, color = TEXT_COLOR, align = .Center)
     return press
 }
 
 
 // Splits a rectangle up into its label and body components.
 @(require_results)
-label_split_rect :: proc(rect: rl.Rectangle) -> (text, body: rl.Rectangle) {
+label_split_rect :: proc(rect: rl.Rectangle, label: cstring) -> (text, body: rl.Rectangle) {
+    if label == nil {
+        return {}, rect
+    }
+
     text = rect
     text.height = LABEL_HEIGHT
 
@@ -264,4 +277,8 @@ padding :: #force_inline proc(rect: rl.Rectangle, pad: rl.Vector2) -> rl.Rectang
 @(require_results)
 want_keyboard :: #force_inline proc() -> bool {
     return state.active_input != nil
+}
+
+is_valid_enum :: proc($E: typeid) -> bool {
+    return intrinsics.type_is_enum(E) && len(E) > 0
 }

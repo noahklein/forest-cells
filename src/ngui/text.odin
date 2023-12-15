@@ -40,6 +40,7 @@ input :: proc(text: ^string, $label: cstring) {
 }
 
 input_rect :: proc(rect: rl.Rectangle, text: ^string, label: cstring) {
+    label_box, input_box := label_split_rect(rect, label)
     key := fmt.ctprintf("%s#input", label)
     active := state.active_input == key
 
@@ -98,11 +99,12 @@ input_rect :: proc(rect: rl.Rectangle, text: ^string, label: cstring) {
         }
     }
 
-    rl.DrawRectangleRec(rect, input_color(hover, active))
+    text_rect(label_box, label)
+    rl.DrawRectangleRec(input_box, input_color(hover, active))
 
     text^ = strings.to_string(input.buf)
     cstr := strings.clone_to_cstring(text^, context.temp_allocator)
-    text_box := padding(rect, {INPUT_PAD, INPUT_PAD})
+    text_box := padding(input_box, {INPUT_PAD, INPUT_PAD})
     text_rect(text_box, cstr, color = TEXT_COLOR)
 
     // Cursor
