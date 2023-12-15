@@ -1,16 +1,10 @@
 package main
 
+import "core:fmt"
 import rl "vendor:raylib"
 import "ngui"
-// import "entity"
+import "entity"
 import "level"
-
-str: string
-
-Checkbox :: enum {
-    Fire, Water, Earth, Air,
-}
-bs1, bs2: bit_set[Checkbox]
 
 draw_gui :: proc(lvl: ^level.Level) {
     ngui.update()
@@ -27,15 +21,6 @@ draw_gui :: proc(lvl: ^level.Level) {
             ngui.vec2(&camera.target, label = "Target")
             ngui.float(&camera.zoom, min = 0, max = 10, label = "Zoom")
         }
-
-        if ngui.flex_row({1}) {
-            ngui.input(&str, "Input")
-        }
-
-        if ngui.flex_row({0.5, 0.5}) {
-            ngui.flags(&bs1, label = "Checkbox")
-            ngui.flags(&bs2)
-        }
     }
 
     if ngui.begin_panel("Level", {1196, 22, 400, 91}) {
@@ -50,6 +35,21 @@ draw_gui :: proc(lvl: ^level.Level) {
             }
         }
 
+        columns : [len(level.AnimalType)]f32
+        for _, i in level.AnimalType do columns[i] = 1.0 / len(level.AnimalType)
+        if ngui.flex_row(columns[:]) {
+            for type in level.AnimalType {
+                if ngui.button(fmt.ctprintf("%v", type)) {
+                    ANIMAL_SPAWN :: rl.Vector2{0, 400}
+                    id := entity.create(entity.Entity{
+                        pos = ANIMAL_SPAWN,
+                        graphic = {.UI, rl.SKYBLUE, entity.Circle{ 30 } },
+                    })
+                    append(&lvl.animals, level.Animal{ ent_id = id, type = .Rabbit })
+                }
+            }
+
+        }
     }
 
     rl.DrawFPS(rl.GetScreenWidth() - 80, 0)

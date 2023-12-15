@@ -17,15 +17,20 @@ TileType :: enum u8{
     Grass,
 }
 
-TileContent :: enum u8 {
-    Grass,
-    Tree,
-}
-
 TILE_COLORS := [TileType]rl.Color{
     .Empty = rl.BLACK,
     .Water = rl.BLUE,
     .Dirt  = rl.BROWN,
     .FertileDirt  = rl.BROWN + {20, 20, 20, 0},
     .Grass = rl.GREEN,
+}
+
+Animal :: struct {
+    ent_id: entity.Id,
+    type: AnimalType,
+    hungry: bool,
+}
+
+AnimalType :: enum {
+    Rabbit,
 }

@@ -8,6 +8,7 @@ FIXED_DT :: 1 // seconds
 
 Level :: struct {
     data: [dynamic]Tile,
+    animals: [dynamic]Animal,
     grid: grid.Grid,
     hovered: rl.Vector2,
     dt_acc: f32,
@@ -31,6 +32,7 @@ init :: proc(size: rl.Vector2) -> (lvl: Level) {
 
 deinit :: proc(level: Level) {
     delete(level.data)
+    delete(level.animals)
 }
 
 update :: proc(level: ^Level, dt: f32, mouse: rl.Vector2) {
@@ -53,7 +55,7 @@ tick :: proc(level: ^Level, dt: f32) {
         tile.modified = false
     }
 
-    for tile, i in level.data {
+    for &tile, i in level.data {
         if tile.modified {
             continue
         }
@@ -78,10 +80,20 @@ tick :: proc(level: ^Level, dt: f32) {
                             set_tile_type(nbr_tile, .Grass)
                         case .Grass:
                     }
-
+                }
+            case .FertileDirt:
+                ivec := grid.int_to_ivec(level.grid, i)
+                for nbr in NEIGHBORS {
+                    target := ivec + nbr
+                    if !grid.in_bounds(level.grid, target) do continue
+                    nbr_i := grid.ivec_to_int(level.grid, target)
+                    nbr_tile := &level.data[nbr_i]
+                    if nbr_tile.type == .Grass {
+                        set_tile_type(&tile, .Grass)
+                    }
                 }
 
-            case .Empty, .Dirt, .FertileDirt, .Grass:
+            case .Empty, .Dirt, .Grass:
         }
     }
 }

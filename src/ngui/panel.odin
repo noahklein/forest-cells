@@ -56,7 +56,7 @@ begin_panel :: proc(title: cstring, rect: rl.Rectangle) -> bool {
     body_rect := rect
     body_rect.height = rect.height - TITLE_HEIGHT
     body_rect.y = rect.y + TITLE_HEIGHT
-    rl.DrawRectangleRec(body_rect, rl.LIGHTGRAY)
+    rl.DrawRectangleRec(body_rect, PANEL_COLOR)
 
     {
         // Resize window.
