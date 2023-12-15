@@ -1,6 +1,5 @@
 package level
 
-import "core:fmt"
 import rl "vendor:raylib"
 import "../grid"
 import "../entity"
@@ -63,7 +62,7 @@ tick :: proc(level: ^Level, dt: f32) {
                     switch nbr_tile.type {
                         case .Empty:
                             nbr_tile.type = .Water
-                            set_ent_type(nbr_tile.ent_id, .Water)
+                            set_tile_type(nbr_tile, .Water)
                         case .Dirt, .Water:
                     }
 
@@ -84,17 +83,7 @@ handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
 
     if rl.IsMouseButtonPressed(.LEFT) {
         i := grid.vec_to_int(level.grid, cell)
-        ent_id := level.data[i].ent_id
-        if ent_id == {0, 0} {
-            fmt.println("fresh", i, grid.vec_to_ivec(level.grid, cell))
-            id := entity.create(entity.Entity{
-                pos = cell,
-                graphic = {.BG, TILE_COLORS[level.brush], entity.Rect{grid.CELL_SIZE}},
-            })
-        } else {
-            level.data[i].type = level.brush
-            set_ent_type(ent_id, level.brush)
-        }
+        set_tile_type(&level.data[i], level.brush)
     }
 
     return true
@@ -107,7 +96,8 @@ draw :: proc(level: Level) {
     }
 }
 
-set_ent_type :: proc(ent_id: entity.Id, type: TileType, loc:=#caller_location) {
-    ent := entity.get(ent_id) or_else panic(#procedure + "() missing entity", loc)
+set_tile_type :: proc(tile: ^Tile, type: TileType, loc:=#caller_location) {
+    tile.type = type
+    ent := entity.get(tile.ent_id) or_else panic(#procedure + "() missing entity", loc)
     ent.graphic.tint = TILE_COLORS[type]
 }
