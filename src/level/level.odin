@@ -48,7 +48,16 @@ tick :: proc(level: ^Level, dt: f32) {
         {-1,  0}, {1, 0},
         { 0, -1}, {0, 1},
     }
+
+    for &tile in level.data {
+        tile.modified = false
+    }
+
     for tile, i in level.data {
+        if tile.modified {
+            continue
+        }
+
         switch tile.type {
             case .Water: // @TODO: fill empty neighbors, fertilize dirt neighbors
                 ivec := grid.int_to_ivec(level.grid, i)
@@ -61,14 +70,18 @@ tick :: proc(level: ^Level, dt: f32) {
 
                     switch nbr_tile.type {
                         case .Empty:
-                            nbr_tile.type = .Water
                             set_tile_type(nbr_tile, .Water)
-                        case .Dirt, .Water:
+                        case .Water:
+                        case .Dirt:
+                            set_tile_type(nbr_tile, .FertileDirt)
+                        case .FertileDirt:
+                            set_tile_type(nbr_tile, .Grass)
+                        case .Grass:
                     }
 
                 }
 
-            case .Empty, .Dirt:
+            case .Empty, .Dirt, .FertileDirt, .Grass:
         }
     }
 }
@@ -98,6 +111,7 @@ draw :: proc(level: Level) {
 
 set_tile_type :: proc(tile: ^Tile, type: TileType, loc:=#caller_location) {
     tile.type = type
+    tile.modified = true
     ent := entity.get(tile.ent_id) or_else panic(#procedure + "() missing entity", loc)
     ent.graphic.tint = TILE_COLORS[type]
 }

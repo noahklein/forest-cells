@@ -42,6 +42,14 @@ draw_gui :: proc(lvl: ^level.Level) {
         if ngui.flex_row({1}) {
             ngui.radio_group(level.TileType, &lvl.brush, "Brush")
         }
+        if ngui.flex_row({1}) {
+            if ngui.button("Clear") {
+                for &tile in lvl.data {
+                    level.set_tile_type(&tile, .Empty)
+                }
+            }
+        }
+
     }
 
     rl.DrawFPS(rl.GetScreenWidth() - 80, 0)

@@ -6,12 +6,15 @@ import rl "vendor:raylib"
 Tile :: struct{
     type: TileType,
     ent_id: entity.Id,
+    modified: bool,
 }
 
 TileType :: enum u8{
     Empty,
-    Dirt,
     Water,
+    Dirt,
+    FertileDirt,
+    Grass,
 }
 
 TileContent :: enum u8 {
@@ -21,6 +24,8 @@ TileContent :: enum u8 {
 
 TILE_COLORS := [TileType]rl.Color{
     .Empty = rl.BLACK,
-    .Dirt  = rl.BROWN,
     .Water = rl.BLUE,
+    .Dirt  = rl.BROWN,
+    .FertileDirt  = rl.BROWN + {20, 20, 20, 0},
+    .Grass = rl.GREEN,
 }
