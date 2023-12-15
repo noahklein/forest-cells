@@ -2,6 +2,8 @@ package grid
 
 import "core:math/linalg"
 import rl "vendor:raylib"
+import "../entity"
+import "../render"
 
 Grid :: struct {
     size: rl.Vector2,
@@ -10,22 +12,33 @@ Grid :: struct {
 
 CELL_SIZE :: 50
 
-init :: proc(size: rl.Vector2) -> Grid {
-    s_width, s_height := f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight())
+init :: proc(pos, size: rl.Vector2) -> Grid {
     g_width, g_height := size.x * CELL_SIZE, size.y * CELL_SIZE
+
+    for x in 0..=size.x {
+        column := pos.x + f32(x * CELL_SIZE)
+        id := entity.create({
+            pos = {column, pos.y},
+        })
+        line := render.Line{ end = {column, pos.y + g_height}}
+        render.add(.UI, render.Graphic{id, rl.BLACK, line})
+    }
+    for y in 0..=size.y {
+        row := pos.y + f32(y * CELL_SIZE)
+        id := entity.create({
+            pos = {pos.x, row},
+        })
+        line := render.Line{ end = {pos.x + g_width, row}}
+        render.add(.UI, {id, rl.BLACK, line})
+    }
+
     return {
         size = size,
-        rect = {
-            (s_width - g_width)   / 2,
-            (s_height - g_height) / 2,
-            g_width,
-            g_height,
-        },
+        rect = { pos.x, pos.y, g_width, g_height },
     }
 }
 
-hovered_cell :: proc(using grid: Grid) -> (rl.Vector2, bool) {
-    mouse := rl.GetMousePosition()
+hovered_cell :: proc(using grid: Grid, mouse: rl.Vector2) -> (rl.Vector2, bool) {
     // Exclude outer grid borders from collision.
     collide := (rect.x < mouse.x && mouse.x < rect.x + rect.width) &&
                (rect.y < mouse.y && mouse.y < rect.y + rect.height)

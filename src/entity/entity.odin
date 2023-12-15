@@ -6,6 +6,7 @@ import "core:testing"
 Entity :: struct {
     age: u16,
     using transform: Transform,
+    disabled: bool,
 }
 
 Transform :: struct {

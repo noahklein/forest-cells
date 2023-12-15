@@ -8,13 +8,17 @@ graphics_layers : [Layer][dynamic]Graphic
 
 Graphic :: struct {
     ent_id: entity.Id,
-    shape: Shape,
     tint: rl.Color,
+    shape: Shape,
 }
 
-Shape :: enum u8 {
+Shape :: union {
     Circle,
+    Line,
 }
+
+Circle :: struct{}
+Line :: struct{ end: rl.Vector2 }
 
 Layer :: enum u8 { BG, FG, UI }
 
@@ -32,9 +36,6 @@ add :: proc(layer: Layer, gfx: Graphic) {
 }
 
 draw :: proc(camera: rl.Camera2D) {
-    rl.BeginDrawing()
-    defer rl.EndDrawing()
-
     rl.ClearBackground(rl.WHITE)
 
     rl.BeginMode2D(camera)
@@ -57,8 +58,9 @@ draw_layer :: proc(layer: Layer) {
 
 
         gfx := graphics[i]
-        switch graphics[i].shape {
-        case .Circle: rl.DrawCircleV(ent.pos, ent.scale, gfx.tint)
+        switch s in graphics[i].shape {
+        case Circle: rl.DrawCircleV(ent.pos, ent.scale, gfx.tint)
+        case Line: rl.DrawLineV(ent.pos, s.end, gfx.tint)
         }
     }
 }

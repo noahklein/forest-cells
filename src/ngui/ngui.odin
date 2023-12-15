@@ -123,19 +123,24 @@ vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1) {
     rect.width /= 2
 
     first := rect
-    f32_rect(first, &v.x, min, max, step)
+    float_rect(first, &v.x, min, max, step)
 
     second := rect
     second.x += rect.width
-    f32_rect(second, &v.y, min, max, step)
+    float_rect(second, &v.y, min, max, step)
 
     // Divider line.
     divider := rl.Vector2{second.x, second.y + COMPONENT_PADDING.y}
     rl.DrawLineV(divider, divider + {0, rect.height - 2 * COMPONENT_PADDING.y}, rl.WHITE)
 }
 
+float :: proc(f: ^f32, min := -INF, max := INF, step: f32 = 0.1) {
+    rect := flex_rect()
+    float_rect(rect, f, min = min, max = max, step = step)
+}
+
 // Draggable f32 editor. Hold alt while dragging for finer control, hold shift to speed it up.
-f32_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32 = 0.1) {
+float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f32 = 0.1) {
     key := fmt.ctprintf("f32#%v", rect)
     press := pressed(rect)
     if press {

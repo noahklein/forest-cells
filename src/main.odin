@@ -12,6 +12,7 @@ import "level"
 
 timescale: f32 = 1.0
 lvl: level.Level
+camera: rl.Camera2D
 
 main :: proc() {
      when ODIN_DEBUG {
@@ -55,8 +56,9 @@ main :: proc() {
     player.player.ent_id = id
     // render.add(.FG, { id, .Circle, rl.RED })
 
-    camera := rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
+    camera = rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
     lvl := level.init({5, 4})
+    defer level.deinit(lvl)
 
     rl.SetTargetFPS(120)
     for !rl.WindowShouldClose() {
@@ -64,10 +66,17 @@ main :: proc() {
 
         player_input := player.get_input()
         player.update(player_input, dt)
-        render.draw(camera)
 
-        level.update(&lvl, dt)
-        level.draw(lvl)
+        mouse := rl.GetScreenToWorld2D(rl.GetMousePosition(), camera)
+        level.update(&lvl, dt, mouse)
+
+        rl.BeginDrawing()
+        defer rl.EndDrawing()
+
+        render.draw(camera)
+        rl.BeginMode2D(camera)
+            level.draw(lvl)
+        rl.EndMode2D()
 
         when ODIN_DEBUG {
             draw_gui()

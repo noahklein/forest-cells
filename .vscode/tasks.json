@@ -4,7 +4,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "odin build src -debug -error-pos-style:unix -strict-style -vet-unused",
+            "command": "odin build src -debug -error-pos-style:unix -strict-style",
             "group": {
                 "kind": "build",
                 "isDefault": true
