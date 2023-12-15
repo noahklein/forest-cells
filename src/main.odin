@@ -52,9 +52,9 @@ main :: proc() {
     defer render.deinit()
 
     // Player entity
-    id := entity.create({ pos = {0, 0}, scale = 50 })
-    player.player.ent_id = id
-    // render.add(.FG, { id, .Circle, rl.RED })
+    player_id := entity.create({ pos = {0, 0}, scale = 50 })
+    player.player.ent_id = player_id
+    render.add(.FG, { player_id, rl.RED, render.Circle{}})
 
     camera = rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
     lvl := level.init({5, 4})
@@ -66,6 +66,7 @@ main :: proc() {
 
         player_input := player.get_input()
         player.update(player_input, dt)
+        cam_follow(&camera, player_id, dt)
 
         mouse := rl.GetScreenToWorld2D(rl.GetMousePosition(), camera)
         level.update(&lvl, dt, mouse)
@@ -86,4 +87,9 @@ main :: proc() {
 
 screen_size :: #force_inline proc() -> rl.Vector2 {
     return { f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight()) }
+}
+
+cam_follow :: proc(cam: ^rl.Camera2D, target: entity.Id, dt: f32) {
+    ent := entity.get(target) or_else panic(#procedure + " requires a valid target")
+    cam.target += (ent.pos - cam.target) * 0.9 * dt
 }

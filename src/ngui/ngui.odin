@@ -3,7 +3,6 @@ package ngui
 import "core:math/linalg"
 import "core:fmt"
 import "core:strings"
-import "core:reflect"
 import "core:intrinsics"
 import rl "vendor:raylib"
 
@@ -118,7 +117,6 @@ button_rect :: proc(rect: rl.Rectangle, label: cstring) -> bool {
     return release && hover
 }
 
-
 vec2 :: proc(v: ^rl.Vector2, min: f32 = -INF, max: f32 = INF, step: f32 = 0.1, label: cstring = nil) {
     rect := flex_rect()
     rect.width /= 2
@@ -163,7 +161,6 @@ float_rect :: proc(rect: rl.Rectangle, f: ^f32, min := -INF, max := INF, step: f
     }
 }
 
-// radio_group :: proc($Enum: typeid, val: ^Enum, label: cstring = nil) where intrinsics.type_is_enum(Enum) {
 radio_group :: proc($Enum: typeid, val: ^Enum, label: cstring = nil) {
     rect := flex_rect()
     radio_group_rect(rect, Enum, val, label)
@@ -171,15 +168,13 @@ radio_group :: proc($Enum: typeid, val: ^Enum, label: cstring = nil) {
 
 radio_group_rect :: proc(rect: rl.Rectangle, $Enum: typeid, val: ^Enum, label: cstring = nil)
                         where intrinsics.type_is_enum(Enum) && len(Enum) > 0 {
-    fields := reflect.enum_fields_zipped(Enum)
-
     label_rect, btn_rect := label_split_rect(rect, label)
 
-    btn_rect.width /= f32(len(fields))
-    for field in fields {
-        cstr := strings.clone_to_cstring(field.name, context.temp_allocator)
-        if toggle_rect(btn_rect, cstr, val^ == Enum(field.value)) {
-            val^ = Enum(field.value)
+    btn_rect.width /= f32(len(Enum))
+    for field in Enum {
+        cstr := fmt.ctprintf("%v", field)
+        if toggle_rect(btn_rect, cstr, val^ == field) {
+            val^ = field
         }
 
         btn_rect.x += btn_rect.width
@@ -197,19 +192,17 @@ flags :: proc(bs: ^$B/bit_set[$Enum], label: cstring = nil) {
 
 flags_rect :: proc(rect: rl.Rectangle, bs: ^$B/bit_set[$Enum], label: cstring = nil)
                 where intrinsics.type_is_enum(Enum) && len(Enum) > 0 {
-    fields := reflect.enum_fields_zipped(Enum)
     label_rect, btn_rect := label_split_rect(rect, label)
 
-    btn_rect.width /= f32(len(fields))
-    for field in fields {
-        cstr := strings.clone_to_cstring(field.name, context.temp_allocator)
-        val := Enum(field.value)
-        enabled := val in bs
+    btn_rect.width /= f32(len(Enum))
+    for field in Enum {
+        cstr := fmt.ctprintf("%v", field)
+        enabled := field in bs
         if toggle_rect(btn_rect, cstr, enabled) {
             if enabled {
-                bs^ -= {val}
+                bs^ -= {field}
             } else {
-                bs^ += {val}
+                bs^ += {field}
             }
 
         }
@@ -277,8 +270,4 @@ padding :: #force_inline proc(rect: rl.Rectangle, pad: rl.Vector2) -> rl.Rectang
 @(require_results)
 want_keyboard :: #force_inline proc() -> bool {
     return state.active_input != nil
-}
-
-is_valid_enum :: proc($E: typeid) -> bool {
-    return intrinsics.type_is_enum(E) && len(E) > 0
 }
