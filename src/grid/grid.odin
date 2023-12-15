@@ -26,7 +26,7 @@ init :: proc(size: rl.Vector2) -> Grid {
 
 hovered_cell :: proc(using grid: Grid) -> (rl.Vector2, bool) {
     mouse := rl.GetMousePosition()
-    // Exclude rectangle borders from collision.
+    // Exclude outer grid borders from collision.
     collide := (rect.x < mouse.x && mouse.x < rect.x + rect.width) &&
                (rect.y < mouse.y && mouse.y < rect.y + rect.height)
     if  !collide {
@@ -35,7 +35,7 @@ hovered_cell :: proc(using grid: Grid) -> (rl.Vector2, bool) {
 
     // Snap down to top-left corner of hovered cell.
     origin := rl.Vector2{rect.x, rect.y}
-    return snap_down_mouse(mouse - origin) + origin, true
+    return snap_down(mouse - origin) + origin, true
 }
 
 draw :: proc(using grid: Grid) {
@@ -52,14 +52,24 @@ draw :: proc(using grid: Grid) {
 }
 
 @(require_results)
-vec_to_int :: #force_inline proc(using g: Grid, v: rl.Vector2) -> [2]int {
-    origin := rl.Vector2{rect.x, rect.y}
-
+vec_to_ivec :: #force_inline proc(g: Grid, v: rl.Vector2) -> [2]int {
+    origin := rl.Vector2{g.rect.x, g.rect.y}
     return linalg.array_cast((v - origin) / CELL_SIZE, int)
 }
 
 @(require_results)
-snap_down :: #force_inline proc(i: i32) -> i32 {
+vec_to_int :: #force_inline proc(g: Grid, v: rl.Vector2) -> int {
+    ivec := vec_to_ivec(g, v)
+    return ivec.x + ivec.y * int(g.size.x)
+}
+
+snap_down :: proc{
+    snap_down_i32,
+    snap_down_vec,
+}
+
+@(require_results)
+snap_down_i32 :: #force_inline proc(i: i32) -> i32 {
     if i < 0 {
         return ((i - CELL_SIZE + 1) / CELL_SIZE) * CELL_SIZE
     }
@@ -68,16 +78,21 @@ snap_down :: #force_inline proc(i: i32) -> i32 {
 }
 
 @(require_results)
-snap_up :: #force_inline proc(i: i32) -> i32 {
+snap_down_vec :: #force_inline proc(m: rl.Vector2) -> rl.Vector2 {
+    return { f32(snap_down(i32(m.x))), f32(snap_down(i32(m.y))) }
+}
+
+snap_up :: proc{
+    snap_up_i32,
+    snap_up_vec,
+}
+
+@(require_results)
+snap_up_i32 :: #force_inline proc(i: i32) -> i32 {
     return snap_down(i) + CELL_SIZE
 }
 
 @(require_results)
-snap_down_mouse :: #force_inline proc(m: rl.Vector2) -> rl.Vector2 {
-    return { f32(snap_down(i32(m.x))), f32(snap_down(i32(m.y))) }
-}
-
-@(require_results)
-snap_up_mouse :: #force_inline proc(m: rl.Vector2) -> rl.Vector2 {
+snap_up_vec :: #force_inline proc(m: rl.Vector2) -> rl.Vector2 {
     return { f32(snap_up(i32(m.x))), f32(snap_up(i32(m.y))) }
 }

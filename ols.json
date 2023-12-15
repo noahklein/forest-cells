@@ -6,7 +6,7 @@
             "path": "/home/noah/odin/core"
         }
     ],
-    "checker_args": "-strict-style -vet-unused",
+    "checker_args": "-debug -strict-style -vet-unused",
     "enable_document_symbols": true,
     "enable_semantic_tokens": false,
     "enable_hover": true,
