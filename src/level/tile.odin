@@ -1,18 +1,27 @@
 package level
 
 import "../entity"
+import rl "vendor:raylib"
 
 Tile :: struct{
     type: TileType,
     ent_id: entity.Id,
 }
 
-TileType :: union{
-    Dirt, Water,
+TileType :: enum u8{
+    Empty,
+    Dirt,
+    Water,
 }
 
-Dirt :: struct{
-    fertile: bool,
+TileContent :: enum u8 {
+    Grass,
+    Tree,
 }
 
-Water :: struct {}
+TILE_COLORS := [TileType]rl.Color{
+    .Empty = rl.BLACK,
+    .Dirt  = rl.BROWN,
+    .Water = rl.BLUE,
+
+}

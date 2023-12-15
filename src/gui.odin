@@ -3,21 +3,16 @@ package main
 import rl "vendor:raylib"
 import "ngui"
 // import "entity"
+import "level"
 
 str: string
-Radio :: enum {
-    One,
-    Two,
-    Three,
-}
-rb1: Radio
-rb2: Radio
+
 Checkbox :: enum {
     Fire, Water, Earth, Air,
 }
 bs1, bs2: bit_set[Checkbox]
 
-draw_gui :: proc() {
+draw_gui :: proc(lvl: ^level.Level) {
     ngui.update()
 
     if ngui.begin_panel("Game", {0, 0, 400, 0}) {
@@ -41,10 +36,11 @@ draw_gui :: proc() {
             ngui.flags(&bs1, label = "Checkbox")
             ngui.flags(&bs2)
         }
+    }
 
-        if ngui.flex_row({0.5, 0.5}) {
-            ngui.radio_group(Radio, &rb1)
-            ngui.radio_group(Radio, &rb2, label = "Radio")
+    if ngui.begin_panel("Level", {1196, 22, 400, 91}) {
+        if ngui.flex_row({1}) {
+            ngui.radio_group(level.TileType, &lvl.brush, "Brush")
         }
     }
 

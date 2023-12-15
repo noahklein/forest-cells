@@ -10,11 +10,10 @@
                 "isDefault": true
             },
             "presentation": {
-                "showReuseMessage": false,
                 "reveal": "always",
                 "revealProblems": "onProblem",
                 "echo": true,
-                "focus": true,
+                "focus": false,
                 "panel": "shared",
                 "clear": true,
             },

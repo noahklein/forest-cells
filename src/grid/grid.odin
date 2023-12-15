@@ -73,7 +73,32 @@ vec_to_ivec :: #force_inline proc(g: Grid, v: rl.Vector2) -> [2]int {
 @(require_results)
 vec_to_int :: #force_inline proc(g: Grid, v: rl.Vector2) -> int {
     ivec := vec_to_ivec(g, v)
+    return ivec_to_int(g, ivec)
+}
+
+@(require_results)
+ivec_to_int :: #force_inline proc(g: Grid, ivec: [2]int) -> int {
     return ivec.x + ivec.y * int(g.size.x)
+}
+
+@(require_results)
+int_to_ivec :: #force_inline proc(g: Grid, i: int) -> [2]int {
+    width := int(g.size.x)
+    return {i % width, i / width }
+}
+
+@(require_results)
+int_to_vec :: #force_inline proc(g: Grid, i: int) -> rl.Vector2 {
+    ivec := int_to_ivec(g, i)
+    v := rl.Vector2(linalg.array_cast(ivec, f32))
+
+    origin := rl.Vector2{g.rect.x, g.rect.y}
+    return (v + origin) * CELL_SIZE
+}
+
+in_bounds :: #force_inline proc(g: Grid, ivec: [2]int) -> bool {
+    return 0 <= ivec.x && ivec.x < int(g.size.x) &&
+           0 <= ivec.y && ivec.y < int(g.size.y)
 }
 
 snap_down :: proc{

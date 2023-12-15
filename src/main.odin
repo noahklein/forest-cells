@@ -80,7 +80,7 @@ main :: proc() {
         rl.EndMode2D()
 
         when ODIN_DEBUG {
-            draw_gui()
+            draw_gui(&lvl)
         }
     }
 }

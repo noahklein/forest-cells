@@ -13,14 +13,23 @@ Level :: struct {
     grid: grid.Grid,
     hovered: rl.Vector2,
     dt_acc: f32,
+
+    brush: TileType,
 }
 
-init :: proc(size: rl.Vector2) -> Level {
-    return {
-        data = make([dynamic]Tile, int(size.x * size.y)),
-        grid = grid.init(0, size),
-        hovered = -1,
+init :: proc(size: rl.Vector2) -> (lvl: Level) {
+    lvl.grid = grid.init(0, size)
+    lvl.data = make([dynamic]Tile, int(size.x * size.y))
+    for &tile, i in lvl.data {
+        tile.ent_id = entity.create({
+            pos = grid.int_to_vec(lvl.grid, i),
+        })
+
+        render.add(.BG, {tile.ent_id, TILE_COLORS[.Empty], render.Rect{ size = grid.CELL_SIZE }})
     }
+
+    lvl.hovered = -1
+    return
 }
 
 deinit :: proc(level: Level) {
@@ -37,7 +46,33 @@ update :: proc(level: ^Level, dt: f32, mouse: rl.Vector2) {
     handle_mouse(level, mouse)
 }
 
-tick :: proc(level: ^Level, dt: f32) {}
+tick :: proc(level: ^Level, dt: f32) {
+    NEIGHBORS :: [4][2]int {
+        {-1,  0}, {1, 0},
+        { 0, -1}, {0, 1},
+    }
+    for tile, i in level.data {
+        switch tile.type {
+            case .Water: // @TODO: fill empty neighbors, fertilize dirt neighbors
+                ivec := grid.int_to_ivec(level.grid, i)
+                for nbr in NEIGHBORS {
+                    target := ivec + nbr
+                    if !grid.in_bounds(level.grid, target) do continue
+
+                    nbr_i := grid.ivec_to_int(level.grid, target)
+
+                    switch level.data[nbr_i].type {
+                        case .Empty:
+                            level.data[nbr_i].type = .Water
+                        case .Dirt, .Water:
+                    }
+
+                }
+
+            case .Empty, .Dirt:
+        }
+    }
+}
 
 handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
     cell, is_hover := grid.hovered_cell(level.grid, mouse)
@@ -52,8 +87,10 @@ handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
         if level.data[i].ent_id == {0, 0} {
             fmt.println("fresh", i, grid.vec_to_ivec(level.grid, cell))
             id := entity.create(entity.Entity{ pos = cell })
-            level.data[i] = Tile{ ent_id = id, type = Dirt{} }
-            render.add(.FG, render.Graphic{id, rl.ORANGE, render.Rect{size = grid.CELL_SIZE} })
+            level.data[i] = Tile{ ent_id = id, type = level.brush }
+            render.add(.BG, render.Graphic{id, TILE_COLORS[level.brush], render.Rect{grid.CELL_SIZE} })
+        } else {
+            // render.edit(.BG, id, render.Graphic{id, })
         }
     }
 
