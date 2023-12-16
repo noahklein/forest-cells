@@ -76,8 +76,8 @@ tick :: proc(level: ^Level, dt: f32) {
                 switch nbr_tile.type {
                     case .Empty:       set_tile_type(nbr_tile, .Water)
                     case .Dirt:        if nbr_tile.time_in_state > 5 do set_tile_type(nbr_tile, .FertileDirt)
-                    case .FertileDirt: if nbr_tile.time_in_state > 5 do set_tile_type(nbr_tile, .Grass)
-                    case .Grass, .Water, .Poop: continue
+                    // case .FertileDirt: if nbr_tile.time_in_state > 5 do set_tile_type(nbr_tile, .Grass)
+                    case .Grass, .FertileDirt, .Water, .Poop: continue
                 }
             }
         case .FertileDirt:

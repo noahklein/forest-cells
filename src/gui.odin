@@ -14,6 +14,17 @@ draw_gui :: proc(lvl: ^level.Level) {
             ngui.slider(&timescale, 0, 10)
             ngui.text("%.1fx Speed", timescale)
         }
+        if ngui.flex_row({0.33, 0.33, 0.33}) {
+            if timescale == 0 && (ngui.button("Play") || rl.IsKeyPressed(.SPACE)) {
+                timescale = 1
+            } else if timescale != 0 && (ngui.button("Pause") || rl.IsKeyPressed(.SPACE)) {
+                timescale = 0
+            }
+
+            if ngui.button("Tick") {
+                level.tick(lvl, level.FIXED_DT)
+            }
+        }
 
         if ngui.flex_row({0.2, 0.3, 0.3, 0.2}) {
             ngui.text("Camera")
@@ -53,7 +64,6 @@ draw_gui :: proc(lvl: ^level.Level) {
                     })
                 }
             }
-
         }
     }
 
