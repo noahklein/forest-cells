@@ -50,7 +50,7 @@ ANIMAL_FOOD := [AnimalType]TileType{
 // Eat: play eating animation, change tile to poop when finished, go to Find Food state.
 
 // Poop takes a long time to become FertileSoil.
-AnimalState :: union {
+AnimalState :: union #no_nil {
     FindFood,
     Move,
     Eat,

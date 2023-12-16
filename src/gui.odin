@@ -10,18 +10,20 @@ draw_gui :: proc(lvl: ^level.Level) {
     ngui.update()
 
     if ngui.begin_panel("Game", {0, 0, 400, 0}) {
-        if ngui.flex_row({0.7, 0.2}) {
+        if ngui.flex_row({0.6, 0.2, 0.2}) {
             ngui.slider(&timescale, 0, 10)
             ngui.text("%.1fx Speed", timescale)
+            ngui.text("Ticks: %v", lvl.ticks, align = .Right)
         }
+
         if ngui.flex_row({0.33, 0.33, 0.33}) {
-            if timescale == 0 && (ngui.button("Play") || rl.IsKeyPressed(.SPACE)) {
-                timescale = 1
-            } else if timescale != 0 && (ngui.button("Pause") || rl.IsKeyPressed(.SPACE)) {
-                timescale = 0
+            paused := timescale == 0
+            if ngui.button("Play" if paused else "Pause") || rl.IsKeyPressed(.SPACE) {
+                timescale = 1 if paused else 0
             }
 
             if ngui.button("Tick") || rl.IsKeyPressed(.TAB) {
+                timescale = 0
                 level.tick(lvl, level.FIXED_DT)
             }
         }
@@ -63,6 +65,16 @@ draw_gui :: proc(lvl: ^level.Level) {
                         state = level.FindFood{},
                     })
                 }
+            }
+        }
+    }
+
+    if ngui.begin_panel("Animals", {0, 400, 300, 0}) {
+        for animal in lvl.animals {
+            if ngui.flex_row({0.2, 0.2, 0.6}) {
+                ngui.text("%v", animal.type)
+                ngui.text("Health %v", animal.health)
+                ngui.text("State %v", animal.state)
             }
         }
     }

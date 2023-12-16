@@ -13,6 +13,7 @@ Level :: struct {
     grid: grid.Grid,
     hovered: rl.Vector2,
     dt_acc: f32,
+    ticks: int,
 
     brush: TileType,
 }
@@ -47,6 +48,8 @@ update :: proc(level: ^Level, dt: f32, mouse: rl.Vector2) {
 }
 
 tick :: proc(level: ^Level, dt: f32) {
+    level.ticks += 1
+
     NEIGHBORS :: [4][2]int {
         {-1,  0}, {1, 0},
         { 0, -1}, {0, 1},
@@ -75,24 +78,23 @@ tick :: proc(level: ^Level, dt: f32) {
 
                 switch nbr_tile.type {
                     case .Empty:       set_tile_type(nbr_tile, .Water)
-                    case .Dirt:        if nbr_tile.time_in_state > 5 do set_tile_type(nbr_tile, .FertileDirt)
-                    // case .FertileDirt: if nbr_tile.time_in_state > 5 do set_tile_type(nbr_tile, .Grass)
+                    case .Dirt:        if nbr_tile.time_in_state > 3 do set_tile_type(nbr_tile, .FertileDirt)
                     case .Grass, .FertileDirt, .Water, .Poop: continue
                 }
             }
         case .FertileDirt:
-            // ivec := grid.int_to_ivec(level.grid, i)
-            // for nbr in NEIGHBORS {
-            //     target := ivec + nbr
-            //     if !grid.in_bounds(level.grid, target) do continue
-            //     nbr_i := grid.ivec_to_int(level.grid, target)
-            //     nbr_tile := &level.data[nbr_i]
-            //     if nbr_tile.type == .Grass {
-            //         set_tile_type(&tile, .Grass)
-            //     }
-            // }
+            ivec := grid.int_to_ivec(level.grid, i)
+            for nbr in NEIGHBORS {
+                target := ivec + nbr
+                if !grid.in_bounds(level.grid, target) do continue
+                nbr_i := grid.ivec_to_int(level.grid, target)
+                nbr_tile := &level.data[nbr_i]
+                if nbr_tile.type == .Grass {
+                    set_tile_type(&tile, .Grass)
+                }
+            }
         case .Poop:
-            if tile.time_in_state > 5 {
+            if tile.time_in_state > 3 {
                 set_tile_type(&tile, .FertileDirt)
             }
         case .Empty, .Dirt, .Grass:
