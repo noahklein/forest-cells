@@ -8,7 +8,7 @@ import "entity"
 import "ngui"
 import "level"
 
-timescale: f32 = 1.0
+timescale: f32 = 0
 lvl: level.Level
 camera: rl.Camera2D
 

@@ -21,7 +21,7 @@ draw_gui :: proc(lvl: ^level.Level) {
                 timescale = 0
             }
 
-            if ngui.button("Tick") {
+            if ngui.button("Tick") || rl.IsKeyPressed(.TAB) {
                 level.tick(lvl, level.FIXED_DT)
             }
         }
