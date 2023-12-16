@@ -48,7 +48,7 @@ main :: proc() {
     defer entity.deinit()
 
     camera = rl.Camera2D{ zoom = 1, offset = screen_size() / 2 }
-    lvl := level.init({20, 15})
+    lvl := level.init({7, 7})
     defer level.deinit(lvl)
     camera.target = {
         lvl.grid.rect.x + lvl.grid.rect.width / 2,

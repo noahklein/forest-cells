@@ -3,6 +3,7 @@ package level
 import rl "vendor:raylib"
 import "../grid"
 import "../entity"
+import "core:fmt"
 
 FIXED_DT :: 1 // seconds
 
@@ -56,46 +57,99 @@ tick :: proc(level: ^Level, dt: f32) {
     }
 
     for &tile, i in level.data {
+        defer tile.time_in_state += 1
+
         if tile.modified {
             continue
         }
 
         switch tile.type {
-            case .Water: // @TODO: fill empty neighbors, fertilize dirt neighbors
-                ivec := grid.int_to_ivec(level.grid, i)
-                for nbr in NEIGHBORS {
-                    target := ivec + nbr
-                    if !grid.in_bounds(level.grid, target) do continue
+        case .Water:
+            ivec := grid.int_to_ivec(level.grid, i)
+            for nbr in NEIGHBORS {
+                target := ivec + nbr
+                if !grid.in_bounds(level.grid, target) do continue
 
-                    nbr_i := grid.ivec_to_int(level.grid, target)
-                    nbr_tile := &level.data[nbr_i]
+                nbr_i := grid.ivec_to_int(level.grid, target)
+                nbr_tile := &level.data[nbr_i]
 
-                    switch nbr_tile.type {
-                        case .Empty:
-                            set_tile_type(nbr_tile, .Water)
-                        case .Water:
-                        case .Dirt:
-                            set_tile_type(nbr_tile, .FertileDirt)
-                        case .FertileDirt:
-                            set_tile_type(nbr_tile, .Grass)
-                        case .Grass:
-                    }
+                switch nbr_tile.type {
+                    case .Empty:       set_tile_type(nbr_tile, .Water)
+                    case .Dirt:        if nbr_tile.time_in_state > 5 do set_tile_type(nbr_tile, .FertileDirt)
+                    case .FertileDirt: if nbr_tile.time_in_state > 5 do set_tile_type(nbr_tile, .Grass)
+                    case .Grass, .Water, .Poop: continue
                 }
-            case .FertileDirt:
-                ivec := grid.int_to_ivec(level.grid, i)
-                for nbr in NEIGHBORS {
-                    target := ivec + nbr
-                    if !grid.in_bounds(level.grid, target) do continue
-                    nbr_i := grid.ivec_to_int(level.grid, target)
-                    nbr_tile := &level.data[nbr_i]
-                    if nbr_tile.type == .Grass {
-                        set_tile_type(&tile, .Grass)
-                    }
-                }
-
-            case .Empty, .Dirt, .Grass:
+            }
+        case .FertileDirt:
+            // ivec := grid.int_to_ivec(level.grid, i)
+            // for nbr in NEIGHBORS {
+            //     target := ivec + nbr
+            //     if !grid.in_bounds(level.grid, target) do continue
+            //     nbr_i := grid.ivec_to_int(level.grid, target)
+            //     nbr_tile := &level.data[nbr_i]
+            //     if nbr_tile.type == .Grass {
+            //         set_tile_type(&tile, .Grass)
+            //     }
+            // }
+        case .Poop:
+            if tile.time_in_state > 5 {
+                set_tile_type(&tile, .FertileDirt)
+            }
+        case .Empty, .Dirt, .Grass:
         }
     }
+
+    // Animals
+    for &animal in level.animals {
+        ent := entity.get(animal.ent_id) or_else panic("Animal entity missing")
+
+        if animal.health < 0 {
+            animal.health = 0
+        }
+        if animal.health == 0 {
+            animal.state = Dead{}
+            ent.graphic.tint = rl.PURPLE
+        }
+
+
+        switch &state in animal.state {
+        case Dead:
+            continue
+        case FindFood:
+            target, ok := find_tile(level, ANIMAL_FOOD[animal.type])
+            if !ok {
+                fmt.println("Ouch. No tiles available of type", ANIMAL_FOOD[animal.type])
+                animal.health -= 1
+                continue
+            }
+
+            animal.state = Move{ target, 1 }
+        case Move:
+            // @TODO: interpolate.
+            fmt.println("moving to", grid.int_to_ivec(level.grid, state.target))
+            ent.pos = grid.int_to_vec(level.grid, state.target)
+
+            state.duration -= dt
+            if state.duration <= 0 {
+                animal.state = Eat{state.target}
+            }
+        case Eat:
+            ent.pos = grid.int_to_vec(level.grid, state.target)
+            set_tile_type(&level.data[state.target], .Poop)
+            animal.health += 1
+            animal.state = FindFood{}
+        }
+    }
+}
+
+find_tile :: proc(level: ^Level, type: TileType) -> (int, bool) {
+    for tile, i in level.data {
+        if !tile.modified && tile.type == type {
+            return i, true
+        }
+    }
+
+    return -1, false
 }
 
 handle_mouse :: proc(level: ^Level, mouse: rl.Vector2) -> bool {
@@ -124,6 +178,7 @@ draw :: proc(level: Level) {
 set_tile_type :: proc(tile: ^Tile, type: TileType, loc:=#caller_location) {
     tile.type = type
     tile.modified = true
+    tile.time_in_state = 0
     ent := entity.get(tile.ent_id) or_else panic(#procedure + "() missing entity", loc)
     ent.graphic.tint = TILE_COLORS[type]
 }

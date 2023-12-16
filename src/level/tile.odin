@@ -6,6 +6,7 @@ import rl "vendor:raylib"
 Tile :: struct{
     type: TileType,
     ent_id: entity.Id,
+    time_in_state: f32,
     modified: bool,
 }
 
@@ -15,6 +16,7 @@ TileType :: enum u8{
     Dirt,
     FertileDirt,
     Grass,
+    Poop,
 }
 
 TILE_COLORS := [TileType]rl.Color{
@@ -23,14 +25,39 @@ TILE_COLORS := [TileType]rl.Color{
     .Dirt  = rl.BROWN,
     .FertileDirt  = rl.BROWN + {20, 20, 20, 0},
     .Grass = rl.GREEN,
+    .Poop = rl.DARKGRAY,
 }
 
 Animal :: struct {
     ent_id: entity.Id,
     type: AnimalType,
-    hungry: bool,
+    state: AnimalState,
+    health: int,
 }
 
 AnimalType :: enum {
     Rabbit,
 }
+
+ANIMAL_FOOD := [AnimalType]TileType{
+    .Rabbit = .Grass,
+}
+
+// Find food tile:
+//      if fail -> take damage, remain in state
+//      else    -> Set food tile as target, mark tile as occupied, go to Move{Eat} state
+// Move: interpolate towards tile (pathfinding?), continue to next state
+// Eat: play eating animation, change tile to poop when finished, go to Find Food state.
+
+// Poop takes a long time to become FertileSoil.
+AnimalState :: union {
+    FindFood,
+    Move,
+    Eat,
+    Dead,
+}
+
+FindFood :: struct{}
+Move     :: struct{ target: int, duration: f32 }
+Eat      :: struct{ target: int, }
+Dead     :: struct{}

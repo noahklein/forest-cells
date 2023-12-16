@@ -45,7 +45,12 @@ draw_gui :: proc(lvl: ^level.Level) {
                         pos = ANIMAL_SPAWN,
                         graphic = {.UI, rl.SKYBLUE, entity.Circle{ 30 } },
                     })
-                    append(&lvl.animals, level.Animal{ ent_id = id, type = .Rabbit })
+                    append(&lvl.animals, level.Animal{
+                        ent_id = id,
+                        type = .Rabbit,
+                        health = 10,
+                        state = level.FindFood{},
+                    })
                 }
             }
 
