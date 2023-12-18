@@ -112,6 +112,10 @@ tick :: proc(level: ^Level, dt: f32) {
             animal.state = Dead{}
             ent.graphic.tint = rl.PURPLE
         }
+        if animal.health >= 20 {
+            animal.health = 10
+            animal_spawn(level, animal.type)
+        }
 
 
         switch &state in animal.state {

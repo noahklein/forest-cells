@@ -61,3 +61,20 @@ FindFood :: struct{}
 Move     :: struct{ target: int, duration: f32 }
 Eat      :: struct{ target: int, }
 Dead     :: struct{}
+
+animal_spawn :: proc(level: ^Level, type: AnimalType) -> entity.Id {
+    ANIMAL_SPAWN :: rl.Vector2{0, 400}
+    id := entity.create(entity.Entity{
+        pos = ANIMAL_SPAWN,
+        graphic = {.UI, rl.SKYBLUE, entity.Circle{ 30 } },
+    })
+
+    append(&level.animals, Animal{
+        ent_id = id,
+        type = type,
+        health = 10,
+        state = FindFood{},
+    })
+
+    return id
+}

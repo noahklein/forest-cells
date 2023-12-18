@@ -3,8 +3,8 @@ package main
 import "core:fmt"
 import rl "vendor:raylib"
 import "ngui"
-import "entity"
 import "level"
+// import "entity"
 
 draw_gui :: proc(lvl: ^level.Level) {
     ngui.update()
@@ -53,17 +53,7 @@ draw_gui :: proc(lvl: ^level.Level) {
         if ngui.flex_row(columns[:]) {
             for type in level.AnimalType {
                 if ngui.button(fmt.ctprintf("%v", type)) {
-                    ANIMAL_SPAWN :: rl.Vector2{0, 400}
-                    id := entity.create(entity.Entity{
-                        pos = ANIMAL_SPAWN,
-                        graphic = {.UI, rl.SKYBLUE, entity.Circle{ 30 } },
-                    })
-                    append(&lvl.animals, level.Animal{
-                        ent_id = id,
-                        type = .Rabbit,
-                        health = 10,
-                        state = level.FindFood{},
-                    })
+                    level.animal_spawn(lvl, type)
                 }
             }
         }
