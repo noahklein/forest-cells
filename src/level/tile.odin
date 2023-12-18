@@ -7,7 +7,7 @@ Tile :: struct{
     type: TileType,
     ent_id: entity.Id,
     time_in_state: f32,
-    modified: bool,
+    modified, occupied: bool,
 }
 
 TileType :: enum u8{

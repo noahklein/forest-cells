@@ -134,10 +134,12 @@ tick :: proc(level: ^Level, dt: f32) {
             state.duration -= dt
             if state.duration <= 0 {
                 animal.state = Eat{state.target}
+                level.data[state.target].occupied = true
             }
         case Eat:
             ent.pos = grid.int_to_vec(level.grid, state.target)
             set_tile_type(&level.data[state.target], .Poop)
+            level.data[state.target].occupied = false
             animal.health += 1
             animal.state = FindFood{}
         }
@@ -146,7 +148,7 @@ tick :: proc(level: ^Level, dt: f32) {
 
 find_tile :: proc(level: ^Level, type: TileType) -> (int, bool) {
     for tile, i in level.data {
-        if !tile.modified && tile.type == type {
+        if !tile.modified && !tile.occupied && tile.type == type {
             return i, true
         }
     }
