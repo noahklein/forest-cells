@@ -125,7 +125,9 @@ tick :: proc(level: ^Level, dt: f32) {
                 continue
             }
 
+            level.data[target].occupied = true
             animal.state = Move{ target, 1 }
+
         case Move:
             // @TODO: interpolate.
             fmt.println("moving to", grid.int_to_ivec(level.grid, state.target))
@@ -134,12 +136,13 @@ tick :: proc(level: ^Level, dt: f32) {
             state.duration -= dt
             if state.duration <= 0 {
                 animal.state = Eat{state.target}
-                level.data[state.target].occupied = true
             }
+
         case Eat:
             ent.pos = grid.int_to_vec(level.grid, state.target)
             set_tile_type(&level.data[state.target], .Poop)
             level.data[state.target].occupied = false
+
             animal.health += 1
             animal.state = FindFood{}
         }

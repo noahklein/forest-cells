@@ -64,7 +64,7 @@ main :: proc() {
 
         rl.BeginDrawing()
         defer rl.EndDrawing()
-        rl.ClearBackground(rl.WHITE)
+        rl.ClearBackground(rl.GREEN)
 
         entity.draw(camera)
         rl.BeginMode2D(camera)

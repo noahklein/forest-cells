@@ -20,10 +20,10 @@ TileType :: enum u8{
 }
 
 TILE_COLORS := [TileType]rl.Color{
-    .Empty = rl.BLACK,
+    .Empty = rl.DARKBROWN,
     .Water = rl.BLUE,
     .Dirt  = rl.BROWN,
-    .FertileDirt  = rl.BROWN + {20, 20, 20, 0},
+    .FertileDirt  = rl.BROWN + {30, 30, 30, 0},
     .Grass = rl.GREEN,
     .Poop = rl.DARKGRAY,
 }
