@@ -13,7 +13,12 @@ draw_gui :: proc(lvl: ^level.Level) {
         if ngui.flex_row({0.6, 0.2, 0.2}) {
             ngui.slider(&timescale, 0, 10)
             ngui.text("%.1fx Speed", timescale)
-            ngui.text("Ticks: %v", lvl.ticks, align = .Right)
+            ngui.text("Ticks: %v", lvl.stats.ticks, align = .Right)
+        }
+
+        if ngui.flex_row({0.2, 0.2}) {
+            ngui.text("Living: %d", lvl.stats.live)
+            ngui.text("Dead:   %d", lvl.stats.dead)
         }
 
         if ngui.flex_row({0.33, 0.33, 0.33}) {

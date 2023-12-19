@@ -13,9 +13,11 @@ Level :: struct {
     grid: grid.Grid,
     hovered: rl.Vector2,
     dt_acc: f32,
-    ticks: int,
 
     brush: TileType,
+    stats: struct {
+        live, dead, ticks: int,
+    },
 }
 
 init :: proc(size: rl.Vector2) -> (lvl: Level) {
@@ -48,7 +50,7 @@ update :: proc(level: ^Level, dt: f32, mouse: rl.Vector2) {
 }
 
 tick :: proc(level: ^Level, dt: f32) {
-    level.ticks += 1
+    level.stats.ticks += 1
 
     NEIGHBORS :: [4][2]int {
         {-1,  0}, {1, 0},
@@ -102,7 +104,7 @@ tick :: proc(level: ^Level, dt: f32) {
     }
 
     // Animals
-    for &animal in level.animals {
+    for &animal, i in level.animals {
         ent := entity.get(animal.ent_id) or_else panic("Animal entity missing")
 
         if animal.health < 0 {
@@ -120,6 +122,10 @@ tick :: proc(level: ^Level, dt: f32) {
 
         switch &state in animal.state {
         case Dead:
+            level.stats.dead += 1
+            level.stats.live -= 1
+            entity.destroy(animal.ent_id)
+            unordered_remove(&level.animals, i)
             continue
         case FindFood:
             target, ok := find_tile(level, ANIMAL_FOOD[animal.type])

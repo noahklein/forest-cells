@@ -76,5 +76,7 @@ animal_spawn :: proc(level: ^Level, type: AnimalType) -> entity.Id {
         state = FindFood{},
     })
 
+    level.stats.live += 1
+
     return id
 }
